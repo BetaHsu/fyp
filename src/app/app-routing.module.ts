@@ -6,14 +6,14 @@ import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
   { 
-    path: '/', 
+    path: '', 
     component: HomeComponent },
   {
-    path: '/create-original-work', 
+    path: 'create-original-work', 
     component: CreateOriginalWorkComponent
   },
   {
-    path: '/create-interaction-work', 
+    path: 'create-interaction-work', 
     component: CreateInteractionWorkComponent
   }
 ];
