@@ -10,6 +10,10 @@ body {
     padding: 24px;
 }
 
+p {
+    margin: 0;
+}
+
 #textarea {
     width: 100%;
 }
@@ -42,4 +46,47 @@ button {
 
 .justify-content--flex-end {
     justify-content: flex-end;
+}
+
+.justify-content--space-between {
+    justify-content: space-between;
+}
+
+/* ELEMENT */
+.dropdown {
+    position: relative;
+}
+
+.dropdown__selection {
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dropdown__options {
+    border: 1px solid black;
+    list-style: none;
+    padding: 6px;
+    position: absolute;
+    z-index: 1;
+    background-color: white;
+}
+
+.dropdown__options li {
+    cursor: pointer;
+    padding: 12px;
+}
+
+.dropdown__options li:hover {
+    text-decoration: underline;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 48
 }

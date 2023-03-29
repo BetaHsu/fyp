@@ -63,7 +63,8 @@
               "browserTarget": "fyp:build:production"
             },
             "development": {
-              "browserTarget": "fyp:build:development"
+              "browserTarget": "fyp:build:development",
+              "proxyConfig": "src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

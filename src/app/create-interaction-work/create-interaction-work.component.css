@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+  }
+  /* For spltting into 2 columns */
+  /* two equal columns that floats next to each other */
+  .column {
+    float: left;
+    width: 50%;
+    padding: 10px;
+    border: 1px solid black;
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+    height: 800px;
+  }
+  /* Clear floats after the columns */
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  /* For draggable input fields */
+  .container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+  .box {
+    border: 3px solid #666;
+    background-color: #ddd;
+    border-radius: .5em;
+    padding: 10px;
+    cursor: move;
+  }
+  /* drop targets */
+  .box.over {
+    border: 3px dotted #666;
+  }
+
+  /* Drag & Drop */
+  .draggable-element {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    width: 150px;
+    height: 150px;
+    border: 2px solid #7C4DFF;
+    border-radius: 8px
+  }
+  .draggable-element:active {
+    box-shadow: 0px 8px 65px 0px rgba(124,77,255,1);
+  }
