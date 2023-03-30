@@ -11,45 +11,68 @@
             <li *ngFor="let view of views; let i = index" (click)="setView(i)">{{view}}</li>
         </ul>
     </div>
-</div>
 
+    <h2 #title >{{ workTitle }}</h2>
+</div>
+<div class="display--flex justify-content--flex-start">
+    <p style="color: rgb(130, 130, 130)">( you are viewing title + {{currentReveal}}% of the work)</p>
+</div>
 <div class="display--flex justify-content--flex-end">
     <p>@betaHsu</p>
 </div>
+
 <!--Interaction View-->
 <div *ngIf="view==0">
     <div class="row">
+        <!-- Original work & Re-writing work-->
         <div class="column" style="background-color:#ffffff;">
-            <p #title *ngIf="paragraph">{{ paragraph.paragraph }}</p>
+            <h4>Original work</h4>
+
+            <!-- show paragraph fetched -->
+            <p *ngIf="paragraph">{{ paragraph.paragraph }}</p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
-
+            <p style="color: rgb(130, 130, 130)">{{interactionInstruction1}}</p>
+            
             <!-- resortable list for 3 input fields -->
             <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
                 <div *ngFor="let item of items; let i = index" cdkDrag>
                     <span class="material-symbols-outlined">
                         drag_indicator
                     </span>
-                    <textarea [id]="'text' + i" [rows]="item.rows" [cols]="item.cols" 
+                    <textarea [id]="'text' + i" [rows]="item.rows"
                     [placeholder]="item.placeholder?.trim()" [(ngModel)]="item.text" 
-                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" [disabled]="item.disabled" ></textarea>
-                    <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" />
+                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" 
+                    [disabled]="item.disabled" ></textarea>
+                    <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" 
+                    [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" />
                 </div>
             </form>
 
-            <div class="justify-content--flex-end display--flex margin-top--24">
-                <button  (click)="getSortedItems(); hideResortableList(resortableList)"  [disabled]="(items[0].text && items[2].text) ? false : true" 
-                [textContent]="buttonText"></button>
-            </div>
-
+            <!-- full rewriting work -->
             <div style="white-space: pre-line">
-                <p>Rewriting text is:</p>
+                <p>Your Rewriting work:</p>
                 <p [innerHTML]="inputTextResorted.join('<br>')"></p>
             </div>
+
+            <!-- save button -->
+            <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
+            <div class="justify-content--flex-end display--flex margin-top--24">
+                <button  *ngIf="!isButtonSaveClicked" (click)="getSortedItems(); hideResortableList(resortableList)"  
+                [disabled]="(items[0].text && items[2].text) ? false : true" >Save</button>
+            </div>
+            <!-- publish button -->
+            <div class="justify-content--flex-end display--flex margin-top--24">
+                <button  *ngIf="isButtonSaveClicked" (click)="changetoPublishView()" 
+                [disabled]="!isButtonSaveClicked" >Publish</button>
+            </div>
         </div>
+        
+        <!-- Parallel work -->
         <div class="column" style="background-color:rgb(250, 250, 250);">
-            <p>{{ workTitle }}</p>
+            <h4>Parallel collaborative work</h4>
+            <p style="font-weight: bold">{{ workTitle }}</p>
 
             <p [innerHTML]="output"></p>
         </div>
@@ -58,7 +81,30 @@
 
 <!--Community View-->
 <div *ngIf="view==1">
-    <p>Community</p>
+    <div class="row">
+        <!-- Original work & Re-writing work-->
+        <div class="column" style="background-color:#ffffff;">
+            <h4>Original work</h4>
+            <p *ngIf="paragraph">{{ paragraph.paragraph }}</p>
+            <div class="w3-border">
+                <div class="w3-grey" style="height:24px;width:20%"></div>
+            </div>
+            <p style="color: rgb(130, 130, 130)">Your Rewriting Work:</p>
+            <p style="color: rgb(130, 130, 130)">(only fully visible to you)</p><br>
+            <p [innerHTML]="inputTextResorted.join('<br>')"></p>
+        </div>
+
+        <!-- Parallel work -->
+        <div class="column" style="background-color:rgb(250, 250, 250);">
+            <h4>Parallel collaborative work</h4>
+            <p>one more instruction</p>
+            <p style="color: rgb(130, 130, 130)">You have contributed to the next sentence of the parallel work. Click each sentence to access other rewritings based on the same original work.</p>
+            <br>
+            <p>{{ workTitle }}</p>
+
+            <p [innerHTML]="output"></p>
+        </div>
+    </div>
 </div>
 
 <!--Public View-->

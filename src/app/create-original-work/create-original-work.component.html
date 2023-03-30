@@ -1,67 +1,29 @@
-<div class="display--flex justify-content--space-between">
-    <div class="dropdown">
-        <div class="dropdown__selection" (click)="toggleDropdown()">
-            <p>{{views[view]}}</p>
-            <span class="material-symbols-outlined">
-                arrow_drop_down
-            </span>
-        </div>
-        <ul class="dropdown__options" *ngIf="dropdownActive">
-            <li *ngFor="let view of views; let i = index" (click)="setView(i)">{{view}}</li>
-        </ul>
-    </div>
-    <h2 #title *ngIf="paragraph">{{ paragraph.paragraph.substr(
-        paragraph['title_interval_start'], paragraph['title_interval_end']) }}</h2>
-    <span></span>
-</div>
-
 <div class="display--flex justify-content--flex-end">
-    <p>@betaHsu</p>
+    <p>@yourName</p>
 </div>
-
-<div *ngIf="view==0">
-    <div class="row">
-        <div class="column" style="background-color:#ffffff;">
-            <p #title *ngIf="paragraph">{{ paragraph.paragraph }}</p>
+<h2 >Create Original Work</h2>
+<h3>To start, submit at least one original work of yours to enable rewriting of others</h3>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
-    
-            <form cdkDropList (cdkDropListDropped)="drop($event)">
+            <p>Create rewriting of the piece using title sentence</p>
+            <!-- resortable list for 3 input fields -->
+            <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
                 <div *ngFor="let item of items; let i = index" cdkDrag>
-                    <textarea [id]="'text' + i" [rows]="item.rows" [cols]="item.cols" 
-                    [placeholder]="item.placeholder?.trim()" [(ngModel)]="item.text" 
-                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" ></textarea>
-                    <!-- <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" /> -->
+                    <span class="material-symbols-outlined">
+                        drag_indicator
+                    </span>
+                    <textarea [id]="'text' + i" [rows]="item.rows"
+                    [placeholder]="item.placeholder" [(ngModel)]="item.text" 
+                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" 
+                    [disabled]="item.disabled" ></textarea>
+                    <!-- <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder"  -->
+                    <!-- [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" /> -->
                 </div>
             </form>
-            <div class="justify-content--flex-end display--flex margin-top--24">
-                <!-- <button  (click)="getSortedItems()">Save Input</button> -->
-                <!-- [disabled]="!{{ items[0].text }} || !{{ items[2].text }}  " -->
-            </div>
-            <div style="white-space: pre-line">
-                <p>Rewriting text is: <br> {{ inputTextResorted }}</p>
-            </div>
-        </div>
-        <div class="column" style="background-color:rgb(250, 250, 250);">
-            <p>{{ workTitle }}</p>
 
-            <p>{{ output }}</p>
-
-            <!-- <p id="paragraph" *ngIf="paragraph">{{ paragraph.revealed.substr(
-                paragraph['title_interval_start'], paragraph['title_interval_end']) }}</p> -->
-        </div>
-    </div>
-</div>
-<!--Community-->
-<div *ngIf="view==1">
-    <p>Community</p>
-</div>
-<!--Public-->
-<div *ngIf="view==2">
-    <p>Public</p>
-</div>
-<!--Owner-->
-<div *ngIf="view==3">
-    <p>Owner</p>
-</div>
+            <div>
+                <button  (click)="getSortedItems(); hideResortableList(resortableList)"  
+                [disabled]="(items[0].text && items[2].text) ? false : true" 
+                [textContent]="buttonText"></button>
+            </div>
