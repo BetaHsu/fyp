@@ -51,3 +51,8 @@
   .draggable-element:active {
     box-shadow: 0px 8px 65px 0px rgba(124,77,255,1);
   }
+  .disabled {
+    background-color: #eee;
+    color: #888;
+    cursor: not-allowed;
+  }

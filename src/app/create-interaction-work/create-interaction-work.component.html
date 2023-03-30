@@ -1,3 +1,4 @@
+<!-- Drop-Down for different views -->
 <div class="display--flex justify-content--space-between">
     <div class="dropdown">
         <div class="dropdown__selection" (click)="toggleDropdown()">
@@ -10,68 +11,62 @@
             <li *ngFor="let view of views; let i = index" (click)="setView(i)">{{view}}</li>
         </ul>
     </div>
-    <h2 #title >{{ workTitle }}</h2>
-    <span></span>
 </div>
 
 <div class="display--flex justify-content--flex-end">
     <p>@betaHsu</p>
 </div>
-
-<button (click)="getParagraph()">Get paragraph</button>
-
+<!--Interaction View-->
 <div *ngIf="view==0">
     <div class="row">
         <div class="column" style="background-color:#ffffff;">
-            <p>Through decades that ran like rivers,</p>
-            <p>endless rivers of endless woes.</p>
-            <p>Through pick and shovel sjambok and jail.</p>
-            <p>O such a long long journey!</p>
-            <p>When the motor-car came,</p>
-            <p>the sledge and the ox-cart began to die.</p>
-            <p>But for a while the bicycle made in Britain, </p>
-            <p>was the dream of every village boy. </p>
-            <p>With the arrival of the bus, </p>
-            <p>the city was brought into the village, </p>
-            <p>and we began to yearn for the place behind the horizons. </p>
-            <p>Such a long travail it was. </p>
-            <p>{{ workTitle }} </p>
-    
+            <p #title *ngIf="paragraph">{{ paragraph.paragraph }}</p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
-    
-            <form cdkDropList (cdkDropListDropped)="drop($event)">
+
+            <!-- resortable list for 3 input fields -->
+            <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
                 <div *ngFor="let item of items; let i = index" cdkDrag>
+                    <span class="material-symbols-outlined">
+                        drag_indicator
+                    </span>
                     <textarea [id]="'text' + i" [rows]="item.rows" [cols]="item.cols" 
                     [placeholder]="item.placeholder?.trim()" [(ngModel)]="item.text" 
-                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" ></textarea>
-                    <!-- <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" /> -->
+                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" [disabled]="item.disabled" ></textarea>
+                    <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" />
                 </div>
             </form>
+
             <div class="justify-content--flex-end display--flex margin-top--24">
-                <button  (click)="getValue(rewritingSection1, workTitle, rewritingSection2)">Save Input</button>
-            
-                <!-- [disabled]="!{{ items[0].text }} || !{{ items[2].text }}  " -->
+                <button  (click)="getSortedItems(); hideResortableList(resortableList)"  [disabled]="(items[0].text && items[2].text) ? false : true" 
+                [textContent]="buttonText"></button>
             </div>
+
             <div style="white-space: pre-line">
-                <p>Rewriting text is: <br> {{ displayVal }}</p>
+                <p>Rewriting text is:</p>
+                <p [innerHTML]="inputTextResorted.join('<br>')"></p>
             </div>
         </div>
         <div class="column" style="background-color:rgb(250, 250, 250);">
             <p>{{ workTitle }}</p>
+
+            <p [innerHTML]="output"></p>
         </div>
     </div>
 </div>
-<!--Community-->
+
+<!--Community View-->
 <div *ngIf="view==1">
     <p>Community</p>
 </div>
-<!--Public-->
+
+<!--Public View-->
 <div *ngIf="view==2">
     <p>Public</p>
 </div>
-<!--Owner-->
+
+<!--Owner View-->
 <div *ngIf="view==3">
     <p>Owner</p>
 </div>
