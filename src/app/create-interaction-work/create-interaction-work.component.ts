@@ -91,6 +91,9 @@ export class CreateInteractionWorkComponent {
   .then((response) => console.log(response))
   }
 
+  generateTitle() {
+    let startTitle
+  }
   generateParagraph() {
     // if revealed score 1 show (interval start~end) text, if reveal score 0 hide (interval start~end) rect boxes
     console.log("Generating paragraph")
@@ -146,6 +149,10 @@ export class CreateInteractionWorkComponent {
 
   changetoPublishView() {
     this.view = 1;
+  }
+
+  changetoInteractionView() {
+    this.view = 0;
   }
 
   getTitle(val:string) {
