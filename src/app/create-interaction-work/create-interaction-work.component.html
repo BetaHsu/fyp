@@ -117,7 +117,24 @@
 
 <!--Public View---------------- -->
 <div *ngIf="view==2">
-    <p>Public</p>
+    <div class="row">
+        <!-- Original work & Re-writing work-->
+        <div class="column" style="background-color:#ffffff;">
+            <h4>Original work</h4>
+            <!-- partially visible paragraph -->
+            <p [innerHTML]="output"></p>
+            <div class="w3-border">
+                <div class="w3-grey" style="height:24px;width:20%"></div>
+            </div>
+            <button  (click)="changetoInteractionView()" >Rewrite this work</button>
+        </div>
+        
+        <!-- Parallel work -->
+        <div class="column" style="background-color:rgb(250, 250, 250);">
+            <h4>Parallel collaborative work</h4>
+            <p style="font-weight: bold">{{ workTitle }}</p>  
+        </div>
+    </div>
 </div>
 
 <!--Owner View-->
