@@ -45,7 +45,8 @@ export class CreateInteractionWorkComponent {
   @Output() viewSelected = new EventEmitter<string>();
 
   // var for testing revealing & hidding sections of paragraph
-  text = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made"
+  fullParagraph = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. "
+  // fullParagraph : string = '';
   metadata = [
     { index_interval_start: 0, index_interval_end: 45, revealed_score: 1 },
     { index_interval_start: 45, index_interval_end: 80, revealed_score: 0 }
@@ -91,11 +92,13 @@ export class CreateInteractionWorkComponent {
   }
 
   generateParagraph() {
+    // if revealed score 1 show (interval start~end) text, if reveal score 0 hide (interval start~end) rect boxes
     console.log("Generating paragraph")
+    let text = this.paragraph.paragraph;
     if (this.paragraph.revealed) {
       this.paragraph.revealed.forEach((data: { index_interval_start: number, index_interval_end: number, revealed_score: number }) => {
         this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' 
-        + this.text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
+        + text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
       })
     }
   }
@@ -199,6 +202,7 @@ export class CreateInteractionWorkComponent {
     // }
   }
 
+  // click on line from rewriting as published title
   onLineClick(index : number) {
     this.selectedLineIndex = index;
   }
@@ -206,7 +210,5 @@ export class CreateInteractionWorkComponent {
   hideResortableList(form: HTMLFormElement) {
     form.hidden = true;
   }
-
-
 }
 
