@@ -18,6 +18,7 @@ export class CreateInteractionWorkComponent {
   view = 0;
   views = ['Interaction', 'Community', 'Public', 'Owner'];
   dropdownActive = false;
+  isButtonSaveClicked = false;
 
   // var for Drag and Drop input fields
   input: string = " ";
@@ -28,17 +29,18 @@ export class CreateInteractionWorkComponent {
   sorted = false;
   inputTextResorted : string[] = [];
   disabledItemId = 'text2';
-  buttonText: string = 'Save';
+  // buttonText: string = 'Save';
   items = [
-    { id: 'text1', rows: '4', cols: '73', placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
-    { id: 'text2', rows: '4', cols: '73', text: this.workTitle, disabled: true },
-    { id: 'text3', rows: '4', cols: '73', placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
+    { id: 'text1', rows: '6',  placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
+    { id: 'text2', rows: '2',  text: this.workTitle, disabled: true },
+    { id: 'text3', rows: '6',  placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
   ];
-  // @ViewChild('resortableList') resortableList: any;
-  // hideInputFields = false;
 
   // var for fetching paragraphs from database
-  paragraph: any = undefined;
+  paragraph: any = undefined; //entire paragraph data structure
+  paragraphTest = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. "
+        
+  entireParagraph: any = undefined;
   output: string = '';
   @Output() viewSelected = new EventEmitter<string>();
 
@@ -48,23 +50,16 @@ export class CreateInteractionWorkComponent {
     { index_interval_start: 0, index_interval_end: 45, revealed_score: 1 },
     { index_interval_start: 45, index_interval_end: 80, revealed_score: 0 }
   ];
-  
+
+  currentReveal = 0;
+  interactionInstruction1 = "Create rewriting of the piece using title sentence";
+  selectedLineIndex = -1;
+
+  // ------ getting & posting to Paragraph Database ----------------
+
+  // fetch paragraph database when loaded
   ngOnInit(): void {
     this.getParagraph();
-    this.generateParagraph();
-  }
-
-  generateParagraph() {
-    this.metadata.forEach((data) => {
-      this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' + this.text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
-    })
-    console.log(this.output)
-  }
-
-  toggleDropdown() {
-    // Toggle the dropdown
-    this.dropdownActive = !this.dropdownActive
-    console.log(this.dropdownActive)
   }
 
   getParagraph() {
@@ -78,16 +73,82 @@ export class CreateInteractionWorkComponent {
     .then((response) => response.json())
     .then((data => {
       this.paragraph = data;
-      console.log(data)
+      this.entireParagraph = data.paragraph;
+      console.log(this.paragraph);
+      this.generateParagraph();
     }));
+  }
+
+  postParagraph(paragraph: any) {
+    console.log('Posting paragraph.')
+    fetch("/api/v1/post-paragraph", {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(paragraph)
+  }
+  )
+  .then((response) => console.log(response))
+  }
+
+  generateParagraph() {
+    console.log("Generating paragraph")
+    if (this.paragraph.revealed) {
+      this.paragraph.revealed.forEach((data: { index_interval_start: number, index_interval_end: number, revealed_score: number }) => {
+        this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' 
+        + this.text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
+      })
+    }
+  }
+
+  publishNewParagraph() {
+    console.log("Publish new paragraph.")
+    console.log(this.inputTextResorted)
+    let paragraph = {
+      'title_interval_start': 439,
+      'title_interval_end': 476,
+      "paragraph": this.inputTextResorted.join('<br>'),
+      "id": Date.now(),
+      "creator_id": "yun",
+      "revealed": [
+          {
+              "index_interval_start": 0,
+              "index_interval_end": 20,
+              "revealed_score": 1,
+          },
+          {
+              "index_interval_start": 20,
+              "index_interval_end": 476,
+              "revealed_score": 0,
+          }
+      ]
+  }
+    this.postParagraph(paragraph)
+  }
+
+  // ------ DropDown for different views ----------------
+
+  toggleDropdown() {
+    // Toggle the dropdown
+    this.dropdownActive = !this.dropdownActive;
+    console.log(this.dropdownActive);
   }
 
   setView(newView: number) {
     // Close the dropdown
-    this.dropdownActive = false
+    this.dropdownActive = false;
     // Update the view
-    this.view = newView
+    this.view = newView;
   }
+
+  changetoPublishView() {
+    this.view = 1;
+  }
+
+  getTitle(val:string) {
+    this.displayTitle = val;
+  }
+
+  // ------ Resort input fields --------------------------------
 
   drop(event: CdkDragDrop<any[]>) {
     const draggedItem = this.items[event.previousIndex];
@@ -103,12 +164,16 @@ export class CreateInteractionWorkComponent {
 
     moveItemInArray(this.items, event.previousIndex, event.currentIndex);
 
-    // If target item is defined, swap properties of the dragged item and the target item
+    // If target item is defined, swap properties of dragged <->> target item
     if (targetItem) {
       // swap text value
       const tempText = draggedItem.text;
       draggedItem.text = targetItem.text;
       targetItem.text = tempText;
+      // swap rows
+      const temprows = draggedItem.rows;
+      draggedItem.rows = targetItem.rows;
+      targetItem.rows = temprows;
       // swap placeholder
       const tempPlaceholder = draggedItem.placeholder;
       draggedItem.placeholder = targetItem.placeholder;
@@ -126,18 +191,22 @@ export class CreateInteractionWorkComponent {
     // if (this.sorted) {
       // iterate through items[], create new array containing only the text property of each object
       this.inputTextResorted = this.items.map(item => item.text).join('\n').split('\n');
-      this.buttonText = 'Publish';
       this.items[0].disabled = this.items[1].disabled = this.items[2].disabled = true;
+      this.isButtonSaveClicked = true;
+      this.interactionInstruction1 = "Select one sentence as title. This will be the only visible text among all by default and will be used to continue the parallel piece.";
       console.log(this.inputTextResorted);
+      this.currentReveal = 100;
     // }
+  }
+
+  onLineClick(index : number) {
+    this.selectedLineIndex = index;
   }
 
   hideResortableList(form: HTMLFormElement) {
     form.hidden = true;
   }
 
-  getTitle(val:string) {
-    this.displayTitle = val;
-  }
+
 }
 
