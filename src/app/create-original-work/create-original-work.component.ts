@@ -10,16 +10,16 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 })
 export class CreateOriginalWorkComponent {
   title = 'fyp';
-  workTitle: string = 'A long journey from bush to concrete';
+  workTitle: string = ' ';
+  user: string | undefined = undefined;
   i = 0;
 
+  // var for drop down list to change view
   view = 0;
   views = ['Interaction', 'Community', 'Public', 'Owner'];
   dropdownActive = false;
 
-  paragraph: any = undefined;
-
-  user: string | undefined = undefined;
+  // var for Drag and Drop input fields
   input: string = " ";
   displayVal= '';
   displayTitle = '';
@@ -27,48 +27,35 @@ export class CreateOriginalWorkComponent {
   rewritingSection2 = '';
   sorted = false;
   inputTextResorted : string[] = [];
+  disabledItemId = 'text2';
+  buttonText: string = 'Save';
+  items = [
+    { id: 'text1', rows: '6',  placeholder: 'Enter 1st section of original work', text: this.rewritingSection1, disabled: false  },
+    { id: 'text2', rows: '2',  placeholder: 'This will be the title (only sentence that is visible to public by default) of this work', text: this.workTitle, disabled: false },
+    { id: 'text3', rows: '6',  placeholder: 'Enter 2nd section of original work', text: this.rewritingSection2, disabled: false }
+  ];
+
+  // var for fetching paragraphs from database
+  paragraph: any = undefined; //entire paragraph data structure
+  entireParagraph: any = undefined;
+  revealedArray: any = undefined;
+  output: string = '';
   @Output() viewSelected = new EventEmitter<string>();
 
-  items = [
-    { id: 'text1', rows: '8', cols: '38', placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1 },
-    { id: 'text2', rows: '1', cols: '38', text: this.workTitle },
-    { id: 'text3', rows: '8', cols: '38', placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2 }
-  ];
-  example_paragraph = document.getElementById('paragraph');
-  text = "Through decades that ran like rivers, endless rivers of endless woes. "
+  // var for testing revealing & hidding sections of paragraph
+  text = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made"
   metadata = [
-    { index_interval_start: 0, index_interval_end: 5, revealed_score: 1 },
-    { index_interval_start: 6, index_interval_end: this.text.length, revealed_score: 0 },
+    { index_interval_start: 0, index_interval_end: 45, revealed_score: 1 },
+    { index_interval_start: 45, index_interval_end: 80, revealed_score: 0 }
   ];
-  
-  get output(): string {
-    let spanIndex = 0;
-    let output = '';
-    this.metadata.forEach((data) => {
-      // add visible span
-      if (data.revealed_score === 1) {
-        const visibleSpan = `<span class="visible">${this.text.slice(data.index_interval_start, data.index_interval_end)}</span>`;
-        output += visibleSpan;
-      }
-      // add hidden span
-      if (data.revealed_score === 0) {
-        const hiddenSpan = `<span class="hidden">${this.text.slice(data.index_interval_start, data.index_interval_end)}</span>`;
-        output += hiddenSpan;
-      }
-    });
-    return output;
-  }
 
+  // ------ Paragraph Database ----------------
+
+  // fetch paragraph database when loaded
   ngOnInit(): void {
     this.getParagraph();
+    this.generateParagraph();
   }
-
-  toggleDropdown() {
-    // Toggle the dropdown
-    this.dropdownActive = !this.dropdownActive
-    console.log(this.dropdownActive)
-  }
-
   getParagraph() {
     //console.log(getParagraph())
     console.log('Getting paragraph')
@@ -80,52 +67,80 @@ export class CreateOriginalWorkComponent {
     .then((response) => response.json())
     .then((data => {
       this.paragraph = data;
-      console.log(data)
+      this.entireParagraph = data.paragraph;
+      this.revealedArray = data.revealed;
+      console.log(this.paragraph);
+      console.log(this.revealedArray);
     }));
   }
 
-  setView(newView: number) {
-    // Close the dropdown
-    this.dropdownActive = false
-
-    // Update the view
-    this.view = newView
+  generateParagraph() {
+    // ?? why simply changing metadata to this.revealedArray then data type is wrong ??
+    if (this.revealedArray) {
+      // this.revealedArray.forEach((data: { index_interval_start: number, index_interval_end: number, revealed_score: number }) => {
+      //   this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' + this.text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
+      // })
+      console.log("this.revealedArray is defined!");
+    }
   }
+
+  getTitle(val:string) {
+    this.displayTitle = val;
+  }
+
+  // ------ Resort input fields ----------------
 
   drop(event: CdkDragDrop<any[]>) {
     const draggedItem = this.items[event.previousIndex];
     const targetItem = this.items[event.currentIndex];
-
+    const movedItem = this.items[event.previousIndex];
+    if (movedItem.disabled) {
+      return;
+    }
     // Remove the dragged item from the array
     this.items.splice(event.previousIndex, 1);
     // Insert the dragged item at the target index
     this.items.splice(event.currentIndex, 0, draggedItem);
 
-    // If the target item is defined, swap text values of the dragged item and the target item
-    if (targetItem) {
-      const temp = draggedItem.text;
-      draggedItem.text = targetItem.text;
-      targetItem.text = temp;
-    }
     moveItemInArray(this.items, event.previousIndex, event.currentIndex);
+
+    // If target item is defined, swap properties of dragged <->> target item
+    if (targetItem) {
+      // swap text value
+      const tempText = draggedItem.text;
+      draggedItem.text = targetItem.text;
+      targetItem.text = tempText;
+      // swap rows
+      const temprows = draggedItem.rows;
+      draggedItem.rows = targetItem.rows;
+      targetItem.rows = temprows;
+      // swap placeholder
+      const tempPlaceholder = draggedItem.placeholder;
+      draggedItem.placeholder = targetItem.placeholder;
+      targetItem.placeholder = tempPlaceholder;
+      // swap disabled property
+      const tempDisabled = draggedItem.disabled;
+      draggedItem.disabled = targetItem.disabled;
+      targetItem.disabled = tempDisabled;
+    }
     this.sorted = true;
   }
 
+  // if click button, get resorted texts, update button text, disable edit for text fields
   getSortedItems() {
     // if (this.sorted) {
       // iterate through items[], create new array containing only the text property of each object
-      this.inputTextResorted = this.items.map(item => item.text);
+      this.inputTextResorted = this.items.map(item => item.text).join('\n').split('\n');
+      this.buttonText = 'Publish';
+      this.items[0].disabled = this.items[1].disabled = this.items[2].disabled = true;
       console.log(this.inputTextResorted);
     // }
   }
 
-  // getValue(val1:string, val2:string, val3:string) {
-  //   console.warn(val1);
-  //   this.displayVal = val1 + '\n' + val2 + '\n' + val3;
-  // }
-  getTitle(val:string) {
-    this.displayTitle = val;
+  hideResortableList(form: HTMLFormElement) {
+    form.hidden = true;
   }
-}
 
+
+}
 
