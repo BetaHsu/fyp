@@ -44,6 +44,8 @@ export class CreateInteractionWorkComponent {
   paragraphTest = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. "
         
   entireParagraph: any = undefined;
+  entireParagraphWithBreak: any = undefined;
+  entireParagraphWithSpanBreak: any = undefined;
   output: string = '';
   @Output() viewSelected = new EventEmitter<string>();
 
@@ -86,6 +88,7 @@ export class CreateInteractionWorkComponent {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
     let text = this.paragraph.paragraph;
+
     if (this.paragraph.revealed) {
       this.paragraph.revealed.forEach((data: { index_interval_start: number, index_interval_end: number, revealed_score: number }) => {
         this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' 
@@ -93,6 +96,8 @@ export class CreateInteractionWorkComponent {
       })
     }
     this.entireParagraph = text;
+    this.entireParagraphWithBreak = text.replace(/([.,;?!])(\s|$)/g, '$1<br>');
+    this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
   }
 
   // ------ Flask "POST" -----------
@@ -100,12 +105,13 @@ export class CreateInteractionWorkComponent {
     console.log("Publish new paragraph.")
     console.log(this.inputTextResorted)
     let paragraph = {
-      'title_interval_start': 439,
-      'title_interval_end': 476,
+      // following-to-be-auto-calculated-by-code
+      "title": 'the sentence rewriting user select',
+      "title_interval_start": 439,
+      "title_interval_end": 476,
       "paragraph": this.inputTextResorted.join('<br>'),
       "id": Date.now(),
       "creator_id": "yun",
-      // following-to-be-calculated-by-code
       "revealed": [
           {
               "index_interval_start": 0,
@@ -116,6 +122,11 @@ export class CreateInteractionWorkComponent {
               "index_interval_start": 20,
               "index_interval_end": 476,
               "revealed_score": 0,
+          },
+          {
+            "index_interval_start": 20,
+            "index_interval_end": 476,
+            "revealed_score": 0,
           }
       ]
   }

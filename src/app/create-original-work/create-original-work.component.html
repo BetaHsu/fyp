@@ -9,6 +9,7 @@
 </div>
 
 <h2 style="text-align:center">Create Original Work</h2>
+
 <!-- title & creator----------------  -->
 <div class="display--flex justify-content--flex-start">
 </div>
@@ -35,14 +36,6 @@
             {{line}}
         </div>
     </div>
-    
-    <!-- <p *ngIf="displayText">{{displayText}}</p> -->
-    <!-- selct sentence to publish -->
-    <!-- <div *ngFor="let line of displayText; let i = index" 
-    [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="">
-        {{ line }}
-    </div> -->
-    <!-- <p [innerHTML]="inputTextResorted.join('<br>')"></p> -->
 </div>
 
 <!-- "Save" button -->
@@ -57,11 +50,3 @@
 <button  *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); getSelectedLine()" [disabled]="!lineSelected">
     Publish
 </button>
-
-
-
-<!-- selct sentence to publish -->
-<!-- <div *ngFor="let line of inputTextResorted; let i = index" 
-            [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
-                {{ line }}
-            </div> -->
