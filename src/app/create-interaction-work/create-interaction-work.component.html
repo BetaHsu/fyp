@@ -1,3 +1,12 @@
+<!-- top-nav-bar ------------------ -->
+<div class="display--flex justify-content--flex-end">
+    <span class="material-symbols-outlined">
+        search
+    </span>
+    <span class="material-symbols-outlined">
+        person
+    </span>
+</div>
 <!-- Drop-Down for different views----------------  -->
 <div class="display--flex justify-content--space-between">
     <div class="dropdown">
@@ -12,8 +21,9 @@
         </ul>
     </div>
 
-    <h2 #title >{{ workTitle }}</h2>
+    
 </div>
+<h2 #title style="text-align:center">{{ workTitle }}</h2>
 <!-- title & creator----------------  -->
 <div class="display--flex justify-content--flex-start">
     <p style="color: rgb(130, 130, 130)">( you are viewing title + {{currentReveal}}% of the work)</p>
@@ -57,7 +67,7 @@
 
             <!-- Display Full rewriting work -->
             <div style="white-space: pre-line">
-                <p>Your Rewriting work:</p>
+                <p *ngIf="isButtonSaveClicked">Your Rewriting work:</p>
                 <!-- <p [innerHTML]="inputTextResorted.join('<br>')"></p> -->
             </div>
             <!-- selct sentence to publish -->
@@ -65,18 +75,18 @@
             [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
                 {{ line }}
             </div>
-            <!-- save button -->
+            <!-- "Save" button -->
+            <!-- shown when "Save" not clicked & disabled when no input texts -->
             <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
             <div class="justify-content--flex-end display--flex margin-top--24">
                 <button  *ngIf="!isButtonSaveClicked" (click)="getSortedItems(); hideResortableList(resortableList)"  
                 [disabled]="(items[0].text && items[2].text) ? false : true" >Save</button>
             </div>
-            <!-- publish button -->
+            <!-- "Publish" button -->
+            <!-- shown when "Save" is clicked & disabled when no line selected -->
             <div class="justify-content--flex-end display--flex margin-top--24">
-                <!-- <button  *ngIf="isButtonSaveClicked" (click)="publishNewParagraph();changetoPublishView()" 
-                [disabled]="!isButtonSaveClicked">Publish</button> -->
-                <button  *ngIf="isButtonSaveClicked" (click)="changetoPublishView()" 
-                [disabled]="!isButtonSaveClicked">Publish</button>
+                <button  *ngIf="isButtonSaveClicked" (click)="publishNewParagraph();changetoPublishView()" 
+                [disabled]="!lineSelected">Publish</button>
             </div>
         </div>
         

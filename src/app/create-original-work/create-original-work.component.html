@@ -1,60 +1,67 @@
-<h2 #title >{{ workTitle }}</h2>
+<!-- top-nav-bar ------------------ -->
+<div class="display--flex justify-content--flex-end">
+    <span class="material-symbols-outlined">
+        search
+    </span>
+    <span class="material-symbols-outlined">
+        person
+    </span>
+</div>
+
+<h2 style="text-align:center">Create Original Work</h2>
 <!-- title & creator----------------  -->
 <div class="display--flex justify-content--flex-start">
 </div>
+<div class="w3-border">
+    <div class="w3-grey" style="height:24px;width:20%"></div>
+</div>
+<p style="color: rgb(130, 130, 130)">To start, submit at least one original work of yours to enable interacting with other works</p>
+<!-- input text ------------------>
 <div class="display--flex justify-content--flex-end">
-    <p>@betaHsu</p>
+    <p>@originalcreator1</p>
+</div>
+<div class="textarea-container">
+    <textarea [(ngModel)]="inputText" *ngIf="!isButtonSaveClicked" 
+    id="originalParagraph" rows="20" 
+    placeholder="Write your original work here"></textarea>
+
+</div>
+<p *ngIf="isButtonSaveClicked" style="color: rgb(130, 130, 130)">Select one sentence as title. This will be the only visible text among all by default.</p>
+<!-- Display Full Original work -->
+<div style="white-space: pre-line">
+    <p *ngIf="isButtonSaveClicked">Your Original work:</p>
+    <div *ngIf="isButtonSaveClicked">
+        <div *ngFor="let line of inputText.split('\n')" (click)="selectedLine = line; lineSelected = true;" [ngClass]="{'selected': selectedLine === line}" style="cursor: pointer;" >
+            {{line}}
+        </div>
+    </div>
+    
+    <!-- <p *ngIf="displayText">{{displayText}}</p> -->
+    <!-- selct sentence to publish -->
+    <!-- <div *ngFor="let line of displayText; let i = index" 
+    [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="">
+        {{ line }}
+    </div> -->
+    <!-- <p [innerHTML]="inputTextResorted.join('<br>')"></p> -->
 </div>
 
-    <div class="row">
-        <!-- Original work & Re-writing work-->
-        <div class="column" style="background-color:#ffffff;">
-            <h4>Original work</h4>
-            <!-- show paragraph fetched -->
-            <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <div class="w3-border">
-                <div class="w3-grey" style="height:24px;width:20%"></div>
-            </div>
-            <!-- <p style="color: rgb(130, 130, 130)">{{interactionInstruction1}}</p> -->
-            
-            <!-- resortable list for 3 input fields -->
-            <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
-                <div *ngFor="let item of items; let i = index" cdkDrag>
-                    <span class="material-symbols-outlined">
-                        drag_indicator
-                    </span>
-                    <textarea [id]="'text' + i" [rows]="item.rows"
-                    [placeholder]="item.placeholder?.trim()" [(ngModel)]="item.text" 
-                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" 
-                    [disabled]="item.disabled" ></textarea>
-                    <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" 
-                    [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" />
-                </div>
-            </form>
+<!-- "Save" button -->
+<!-- shown when "Save" not clicked & disabled when no input texts -->
+<p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
+<button  *ngIf="!isButtonSaveClicked" (click)="enableSaveButton()" [disabled]="!inputText" >
+    Save
+</button>
 
-            <!-- selct sentence to publish -->
-            <!-- <div *ngFor="let line of inputTextResorted; let i = index" 
+<!-- "Publish" button -->
+<!-- shown when "Save" is clicked & disabled when no line selected -->
+<button  *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); getSelectedLine()" [disabled]="!lineSelected">
+    Publish
+</button>
+
+
+
+<!-- selct sentence to publish -->
+<!-- <div *ngFor="let line of inputTextResorted; let i = index" 
             [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
                 {{ line }}
             </div> -->
-            <!-- save button -->
-            <!-- <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p> -->
-            <div class="justify-content--flex-end display--flex margin-top--24">
-                <!-- <button  *ngIf="!isButtonSaveClicked" (click)="getSortedItems(); hideResortableList(resortableList)"   -->
-                <!-- [disabled]="(items[0].text && items[2].text) ? false : true" >Save</button> -->
-            </div>
-            <!-- publish button -->
-            <div class="justify-content--flex-end display--flex margin-top--24">
-                <!-- <button  *ngIf="isButtonSaveClicked" (click)="publishNewParagraph();changetoPublishView()" 
-                [disabled]="!isButtonSaveClicked">Publish</button> -->
-                <!-- <button  *ngIf="isButtonSaveClicked" (click)="changetoPublishView()" 
-                [disabled]="!isButtonSaveClicked">Publish</button> -->
-            </div>
-        </div>
-        
-        <!-- Parallel work -->
-        <div class="column" style="background-color:rgb(250, 250, 250);">
-            <h4>Parallel collaborative work</h4>
-            <p style="font-weight: bold">{{ workTitle }}</p>  
-        </div>
-    </div>

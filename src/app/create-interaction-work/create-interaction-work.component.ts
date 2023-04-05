@@ -35,6 +35,9 @@ export class CreateInteractionWorkComponent {
     { id: 'text2', rows: '2',  text: this.workTitle, disabled: true },
     { id: 'text3', rows: '6',  placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
   ];
+  // var for selcting line to publish
+  selectedLineIndex = -1;
+  lineSelected = false;
 
   // var for fetching paragraphs from database
   paragraph: any = undefined; //entire paragraph data structure
@@ -54,17 +57,16 @@ export class CreateInteractionWorkComponent {
 
   currentReveal = 0;
   interactionInstruction1 = "Create rewriting of the piece using title sentence";
-  selectedLineIndex = -1;
 
-  // ------ getting & posting to Paragraph Database ----------------
+  // ------ Getting & Posting to Paragraph Database ------------------------
 
   // fetch paragraph database when loaded
   ngOnInit(): void {
     this.getParagraph();
   }
 
+  // ------ Flask "GET" -----------
   getParagraph() {
-    //console.log(getParagraph())
     console.log('Getting paragraph')
     fetch("/api/v1/get-paragraph", {
         method: 'GET',
@@ -80,22 +82,8 @@ export class CreateInteractionWorkComponent {
     }));
   }
 
-  postParagraph(paragraph: any) {
-    console.log('Posting paragraph.')
-    fetch("/api/v1/post-paragraph", {
-      method: 'POST',
-      mode: 'cors',
-      body: JSON.stringify(paragraph)
-  }
-  )
-  .then((response) => console.log(response))
-  }
-
-  generateTitle() {
-    let startTitle
-  }
   generateParagraph() {
-    // if revealed score 1 show (interval start~end) text, if reveal score 0 hide (interval start~end) rect boxes
+    // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
     let text = this.paragraph.paragraph;
     if (this.paragraph.revealed) {
@@ -107,6 +95,7 @@ export class CreateInteractionWorkComponent {
     this.entireParagraph = text;
   }
 
+  // ------ Flask "POST" -----------
   publishNewParagraph() {
     console.log("Publish new paragraph.")
     console.log(this.inputTextResorted)
@@ -116,6 +105,7 @@ export class CreateInteractionWorkComponent {
       "paragraph": this.inputTextResorted.join('<br>'),
       "id": Date.now(),
       "creator_id": "yun",
+      // following-to-be-calculated-by-code
       "revealed": [
           {
               "index_interval_start": 0,
@@ -132,7 +122,18 @@ export class CreateInteractionWorkComponent {
     this.postParagraph(paragraph)
   }
 
-  // ------ DropDown for different views ----------------
+  postParagraph(paragraph: any) {
+    console.log('Posting paragraph.')
+    fetch("/api/v1/post-paragraph", {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(paragraph)
+  }
+  )
+  .then((response) => console.log(response))
+  }
+
+  // ------ DropDown for different views -------------------
 
   toggleDropdown() {
     // Toggle the dropdown
@@ -154,6 +155,10 @@ export class CreateInteractionWorkComponent {
   changetoInteractionView() {
     this.view = 0;
   }
+
+   // generateTitle() {
+  //   let startTitle
+  // }
 
   getTitle(val:string) {
     this.displayTitle = val;
@@ -213,6 +218,7 @@ export class CreateInteractionWorkComponent {
   // click on line from rewriting as published title
   onLineClick(index : number) {
     this.selectedLineIndex = index;
+    this.lineSelected = true
   }
 
   hideResortableList(form: HTMLFormElement) {
