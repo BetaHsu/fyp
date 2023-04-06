@@ -47,6 +47,7 @@
 
 <!-- "Publish" button -->
 <!-- shown when "Save" is clicked & disabled when no line selected -->
-<button  *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); getSelectedLine()" [disabled]="!lineSelected">
+<button *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); getSelectedLine()" [disabled]="!lineSelected">
     Publish
 </button>
+<!-- ;fromCreateInteractionWorkComponent=true -->

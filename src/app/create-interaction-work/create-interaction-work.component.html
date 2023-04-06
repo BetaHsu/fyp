@@ -42,7 +42,7 @@
             <!-- <p *ngIf="isButtonSaveClicked==false" [innerHTML]="output"></p> -->
             <p *ngIf="isButtonSaveClicked==false" [innerHTML]="entireParagraphWithSpanBreak"></p>
             <!-- fully visible paragraph -->
-            <p *ngIf="isButtonSaveClicked==true">{{ entireParagraph }}</p>
+            <p *ngIf="isButtonSaveClicked==true">{{ entireParagraphWithoutBreak }}</p>
 
             <!-- show paragraph fetched -->
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
@@ -107,7 +107,7 @@
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <p [innerHTML]="entireParagraphWithBreak"></p>
+            <p [innerHTML]="entireParagraphWithoutBreak"></p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
@@ -122,7 +122,7 @@
             <p style="color: rgb(130, 130, 130)">You have contributed to the next sentence of the parallel work. Click each sentence to access other rewritings based on the same original work.</p>
             <br>
             <p>{{ workTitle }}</p>
-            <p *ngIf="selectedLineIndex !== undefined">{{ inputTextResorted[selectedLineIndex] }}</p>
+            <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p>
         </div>
     </div>
 </div>

@@ -2,6 +2,8 @@ import { Component, EventEmitter, Output, Input  } from '@angular/core';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-create-original-work',
@@ -9,6 +11,10 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
   styleUrls: ['./create-original-work.component.css']
 })
 export class CreateOriginalWorkComponent {
+
+  constructor(private router: Router) {
+
+  }
   isButtonSaveClicked = false;
   lineSelected = false;
   entireOriginalInput = '';
@@ -16,6 +22,10 @@ export class CreateOriginalWorkComponent {
   originalSection2 = '';
   inputText: string = '';
   selectedLine = '';
+
+  goToNewComponent(){
+    this.router.navigate(['/create-interaction-work']);
+  }
 
   enableSaveButton() {
     this.isButtonSaveClicked = true;
@@ -27,7 +37,7 @@ export class CreateOriginalWorkComponent {
   }
 
   goToOwnerView() {
-
+    this.router.navigate(['/create-interaction-work'], { queryParams: {fromCreateOriginalWork: true}})
   }
 }
 

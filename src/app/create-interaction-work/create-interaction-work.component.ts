@@ -1,14 +1,30 @@
-import { Component, EventEmitter, Output, Input  } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit  } from '@angular/core';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-create-interaction-work',
   templateUrl: './create-interaction-work.component.html',
   styleUrls: ['./create-interaction-work.component.css'],
 })
-export class CreateInteractionWorkComponent {
+export class CreateInteractionWorkComponent implements OnInit {
+  source = '';
+
+  constructor(private route: ActivatedRoute) {
+
+  }
+  // when loaded:
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['fromCreateOriginalWork'] === 'true') {
+        this.view = 3;
+      }
+    })
+    this.getParagraph();
+  }
+
   title = 'fyp';
   workTitle: string = 'A long journey from bush to concrete';
   user: string | undefined = undefined;
@@ -38,14 +54,16 @@ export class CreateInteractionWorkComponent {
   // var for selcting line to publish
   selectedLineIndex = -1;
   lineSelected = false;
+  nextSentenceForParallel = '';
 
   // var for fetching paragraphs from database
   paragraph: any = undefined; //entire paragraph data structure
   paragraphTest = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. "
         
-  entireParagraph: any = undefined;
-  entireParagraphWithBreak: any = undefined;
-  entireParagraphWithSpanBreak: any = undefined;
+  // entireParagraph: any = undefined;
+  entireParagraphWithBreak: any = undefined; // paragraph.paragraph in the database itself is already w/ break
+  entireParagraphWithoutBreak: any = undefined; // remove <br> from paragraph.paragraph
+  entireParagraphWithSpanBreak: any = undefined; // for displaying paragraph w/ hidden or visible score
   output: string = '';
   @Output() viewSelected = new EventEmitter<string>();
 
@@ -60,14 +78,12 @@ export class CreateInteractionWorkComponent {
   currentReveal = 0;
   interactionInstruction1 = "Create rewriting of the piece using title sentence";
 
-  // ------ Getting & Posting to Paragraph Database ------------------------
+  // ------ GETTING & POSTING to Paragraph Database -------------------------------
 
-  // fetch paragraph database when loaded
-  ngOnInit(): void {
-    this.getParagraph();
-  }
+  
 
-  // ------ Flask "GET" -----------
+  // ------ Flask "GET" : get paragraph-------------------
+
   getParagraph() {
     console.log('Getting paragraph')
     fetch("/api/v1/get-paragraph", {
@@ -78,12 +94,11 @@ export class CreateInteractionWorkComponent {
     .then((response) => response.json())
     .then((data => {
       this.paragraph = data;
-      this.entireParagraph = data.paragraph;
-      console.log(this.paragraph);
+      // this.entireParagraph = data.paragraph;
+      // console.log(this.paragraph);
       this.generateParagraph();
     }));
   }
-
   generateParagraph() {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
@@ -95,33 +110,39 @@ export class CreateInteractionWorkComponent {
         + text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
       })
     }
-    this.entireParagraph = text;
-    this.entireParagraphWithBreak = text.replace(/([.,;?!])(\s|$)/g, '$1<br>');
-    this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
+    this.entireParagraphWithBreak = text;
+    this.entireParagraphWithoutBreak = text.replace(/<br>/g, '')
+    this.entireParagraphWithSpanBreak = this.output;
+    // this.entireParagraphWithBreak = text.replace(/([.,;?!])(\s|$)/g, '$1<br>');
+    // this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
   }
 
-  // ------ Flask "POST" -----------
+
+  // ------ Flask "POST" : Post paragraph -------------------
   publishNewParagraph() {
-    console.log("Publish new paragraph.")
-    console.log(this.inputTextResorted)
+    console.log("Publish new paragraph.");
+    console.log(this.inputTextResorted);
+    // following-to-be-auto-calculated-by-code
     let paragraph = {
-      // following-to-be-auto-calculated-by-code
-      "title": 'the sentence rewriting user select',
+      "title": 'the title rewriting user select',
       "title_interval_start": 439,
       "title_interval_end": 476,
       "paragraph": this.inputTextResorted.join('<br>'),
       "id": Date.now(),
       "creator_id": "yun",
+      "parallel_sentences": [
+        "the title rewriting user select"
+      ],
       "revealed": [
           {
               "index_interval_start": 0,
               "index_interval_end": 20,
-              "revealed_score": 1,
+              "revealed_score": 0,
           },
           {
               "index_interval_start": 20,
               "index_interval_end": 476,
-              "revealed_score": 0,
+              "revealed_score": 1,
           },
           {
             "index_interval_start": 20,
@@ -130,9 +151,9 @@ export class CreateInteractionWorkComponent {
           }
       ]
   }
-    this.postParagraph(paragraph)
+    this.postParagraph(paragraph);
+    this.postSentenceToParallel(this.nextSentenceForParallel)
   }
-
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch("/api/v1/post-paragraph", {
@@ -144,6 +165,20 @@ export class CreateInteractionWorkComponent {
   .then((response) => console.log(response))
   }
 
+  // ------ Flask "POST" : Post sentence to parallel -------------------
+
+  postSentenceToParallel(sentence: any) {
+    console.log('Posting sentence to parallel.')
+    fetch("/api/v1/post-sentence-to-parallel", {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(sentence)
+  }
+  )
+  .then((response) => console.log(response))
+  }
+
+
   // ------ DropDown for different views -------------------
 
   toggleDropdown() {
@@ -151,26 +186,18 @@ export class CreateInteractionWorkComponent {
     this.dropdownActive = !this.dropdownActive;
     console.log(this.dropdownActive);
   }
-
   setView(newView: number) {
     // Close the dropdown
     this.dropdownActive = false;
     // Update the view
     this.view = newView;
   }
-
   changetoPublishView() {
     this.view = 1;
   }
-
   changetoInteractionView() {
     this.view = 0;
   }
-
-   // generateTitle() {
-  //   let startTitle
-  // }
-
   getTitle(val:string) {
     this.displayTitle = val;
   }
@@ -213,7 +240,7 @@ export class CreateInteractionWorkComponent {
     this.sorted = true;
   }
 
-  // if click button, get resorted texts, update button text, disable edit for text fields
+  // if click button, get resorted texts, update button
   getSortedItems() {
     // if (this.sorted) {
       // iterate through items[], create new array containing only the text property of each object
@@ -221,15 +248,19 @@ export class CreateInteractionWorkComponent {
       this.items[0].disabled = this.items[1].disabled = this.items[2].disabled = true;
       this.isButtonSaveClicked = true;
       this.interactionInstruction1 = "Select one sentence as title. This will be the only visible text among all by default and will be used to continue the parallel piece.";
-      console.log(this.inputTextResorted);
       this.currentReveal = 100;
+      console.log("this.paragraph.paragraph is:" + this.paragraph.paragraph);
+      console.log("this.entireParagraphWithBreak is:" + this.entireParagraphWithBreak);
+      console.log("this.entireParagraphWithoutBreak is:" + this.entireParagraphWithoutBreak);
+      console.log("this.entireParagraphWithSpanBreak is:" + this.entireParagraphWithSpanBreak);
     // }
   }
 
   // click on line from rewriting as published title
   onLineClick(index : number) {
     this.selectedLineIndex = index;
-    this.lineSelected = true
+    this.lineSelected = true;
+    this.nextSentenceForParallel = this.inputTextResorted[this.selectedLineIndex];
   }
 
   hideResortableList(form: HTMLFormElement) {
