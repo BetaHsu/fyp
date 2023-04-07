@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-create-interaction-work',
@@ -10,12 +11,10 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./create-interaction-work.component.css'],
 })
 export class CreateInteractionWorkComponent implements OnInit {
-  source = '';
-
   constructor(private route: ActivatedRoute) {
 
   }
-  // when loaded:
+  // initialize: load paragraph database & check if route from create-original-work page
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       if (params['fromCreateOriginalWork'] === 'true') {
@@ -78,15 +77,20 @@ export class CreateInteractionWorkComponent implements OnInit {
   currentReveal = 0;
   interactionInstruction1 = "Create rewriting of the piece using title sentence";
 
-  // ------ GETTING & POSTING to Paragraph Database -------------------------------
-
-  
+  testAPI() {
+    //throw new Error('Method not implemented.');
+    fetch((environment.apiUrl + "/api/test"), {
+      method: 'GET',
+      mode: 'cors'
+    })
+    .then((response) => response.json).then((json) => console.log(json))
+  }
 
   // ------ Flask "GET" : get paragraph-------------------
 
   getParagraph() {
     console.log('Getting paragraph')
-    fetch("/api/v1/get-paragraph", {
+    fetch((environment.apiUrl + "/api/v1/get-paragraph"), {
         method: 'GET',
         mode: 'cors'
     }
@@ -156,7 +160,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   }
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
-    fetch("/api/v1/post-paragraph", {
+    fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(paragraph)
@@ -169,7 +173,7 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   postSentenceToParallel(sentence: any) {
     console.log('Posting sentence to parallel.')
-    fetch("/api/v1/post-sentence-to-parallel", {
+    fetch((environment.apiUrl + "/api/v1/post-sentence-to-parallel"), {
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(sentence)
