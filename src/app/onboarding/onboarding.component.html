@@ -1,6 +1,14 @@
 <p>onboarding works!</p>
 
-
+<!-- top-nav-bar ------------------ -->
+<div class="display--flex justify-content--flex-end">
+    <span class="material-symbols-outlined">
+        search
+    </span>
+    <span class="material-symbols-outlined">
+        person
+    </span>
+</div>
 <div class="auth-container">
     <h2>{{ isSigningUp ? 'Sign Up' : 'Sign In'}}</h2>
     <form (submit)="onSubmit()">

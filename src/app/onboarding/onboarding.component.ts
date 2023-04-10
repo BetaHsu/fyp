@@ -18,25 +18,14 @@ export class OnboardingComponent {
     // Sign Up
     if (this.isSigningUp) {
       this.authService.signup(this.email, this.password)
-        .subscribe(
-          response => {
-            this.message = response.message;
-          },
-          error => {
-            this.message = error.error.message;
-          }
-        );
+
     // Sign In
     } else {
-      this.authService.signin(this.email, this.password)
-        .subscribe(
-          response => {
-            this.message = response.message;
-          },
-          error => {
-            this.message = error.error.message;
-          }
-        );
+      this.authService.signin(this.email, this.password).then((user: { userid: string; }) => {
+        if (user.userid) {
+          localStorage.setItem("userid", user.userid)
+        }
+      })
     }
   }
   toggleSignIn(): void {

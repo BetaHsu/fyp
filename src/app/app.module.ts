@@ -9,6 +9,7 @@ import { HomeComponent } from './home/home.component';
 import { CreateOriginalWorkComponent } from './create-original-work/create-original-work.component';
 import { CreateInteractionWorkComponent } from './create-interaction-work/create-interaction-work.component';
 import { OnboardingComponent } from './onboarding/onboarding.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { OnboardingComponent } from './onboarding/onboarding.component';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    DragDropModule
+    DragDropModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

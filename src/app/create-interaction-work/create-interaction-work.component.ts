@@ -133,7 +133,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       "title_interval_end": 476,
       "paragraph": this.inputTextResorted.join('<br>'),
       "id": Date.now(),
-      "creator_id": "yun",
+      "creator_id": localStorage.getItem('userid'),
       "parallel_sentences": [
         "the title rewriting user select"
       ],
@@ -161,6 +161,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
+      // & sending cookies
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(paragraph)
