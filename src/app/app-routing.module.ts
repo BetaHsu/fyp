@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CreateInteractionWorkComponent } from './create-interaction-work/create-interaction-work.component';
 import { CreateOriginalWorkComponent } from './create-original-work/create-original-work.component';
+import { OnboardingComponent } from './onboarding/onboarding.component'; 
 import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
@@ -15,6 +16,10 @@ const routes: Routes = [
   {
     path: 'create-interaction-work', 
     component: CreateInteractionWorkComponent
+  },
+  {
+    path: 'onboarding', 
+    component: OnboardingComponent
   }
 ];
 
