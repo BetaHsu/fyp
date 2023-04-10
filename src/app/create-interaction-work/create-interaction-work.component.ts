@@ -44,12 +44,12 @@ export class CreateInteractionWorkComponent implements OnInit {
   sorted = false;
   inputTextResorted : string[] = [];
   disabledItemId = 'text2';
-  // buttonText: string = 'Save';
   items = [
     { id: 'text1', rows: '6',  placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
     { id: 'text2', rows: '2',  text: this.workTitle, disabled: true },
     { id: 'text3', rows: '6',  placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
   ];
+
   // var for selcting line to publish
   selectedLineIndex = -1;
   lineSelected = false;
@@ -67,7 +67,6 @@ export class CreateInteractionWorkComponent implements OnInit {
   @Output() viewSelected = new EventEmitter<string>();
 
   // var for testing revealing & hidding sections of paragraph
-  // fullParagraph = "Through decades that ran like rivers, endless rivers of endless woes. Through pick and shovel sjambok and jail. O such a long long journey! When the motor-car came, the sledge and the ox-cart began to die. But for a while the bicycle made in Britain, was the dream of every village boy. With the arrival of the bus, the city was brought into the village, and we began to yearn for the place behind the horizons. Such a long travail it was. A long journey from bush to concrete. "
   fullParagraph : any = undefined;
   metadata = [
     { index_interval_start: 0, index_interval_end: 45, revealed_score: 1 },
@@ -103,6 +102,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.generateParagraph();
     }));
   }
+
   generateParagraph() {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
@@ -253,10 +253,6 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.isButtonSaveClicked = true;
       this.interactionInstruction1 = "Select one sentence as title. This will be the only visible text among all by default and will be used to continue the parallel piece.";
       this.currentReveal = 100;
-      console.log("this.paragraph.paragraph is:" + this.paragraph.paragraph);
-      console.log("this.entireParagraphWithBreak is:" + this.entireParagraphWithBreak);
-      console.log("this.entireParagraphWithoutBreak is:" + this.entireParagraphWithoutBreak);
-      console.log("this.entireParagraphWithSpanBreak is:" + this.entireParagraphWithSpanBreak);
     // }
   }
 
