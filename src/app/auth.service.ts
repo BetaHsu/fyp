@@ -19,8 +19,6 @@ export class AuthService {
 
 
   signup(email: string, password: string): any {
-    // make HTTP POST requests to /api/signup endpoints of  Flask backend API
-    // passing in the email and password parameters as JSON in the request body
     return fetch((environment.apiUrl + "/api/v1/signup"), {
       method: 'POST',
       mode: 'cors',
@@ -34,8 +32,6 @@ export class AuthService {
   }
 
   signin(email: string, password: string): any {
-    // make HTTP POST requests to /api/signin endpoints of  Flask backend API
-    // passing in the email and password parameters as JSON in the request body
     return fetch((environment.apiUrl + "/api/v1/signup"), {
       method: 'POST',
       mode: 'cors',

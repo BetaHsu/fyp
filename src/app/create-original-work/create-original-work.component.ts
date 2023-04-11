@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-create-original-work',
@@ -16,12 +17,69 @@ export class CreateOriginalWorkComponent {
 
   }
   isButtonSaveClicked = false;
-  lineSelected = false;
   entireOriginalInput = '';
   originalSection1 = '';
   originalSection2 = '';
   inputText: string = '';
-  selectedLine = '';
+  inputTextinArray: string[] = [];
+  inputTextinArrayWithBreak: string = '';
+  selectedTitle = '';
+
+  // var for selcting line to publish
+  selectedLineIndex = -1;
+  lineSelected = false;
+  startIndexofSelected = -1;
+  endIndexofSelected = -1;
+  sectionBeforeStartIndex = 0;
+  sectionBeforeEndIndex = 0;
+  sectionBefore: string = " ";
+  sectionAfterStartIndex = 0;
+  sectionAfterEndIndex = 0;
+  sectionAfter: string = " ";
+
+  // ------ Flask "POST" : Post paragraph -------------------
+  publishNewParagraph() {
+    console.log("Publish new paragraph.");
+    let paragraph = {
+      "title": this.selectedTitle,
+      "title_interval_start": this.startIndexofSelected,
+      "title_interval_end": this.endIndexofSelected,
+      "paragraph": this.inputTextinArrayWithBreak,
+      "id": Date.now(),
+      "creator_id": localStorage.getItem('userid'),
+      "parallel_sentences": [
+        this.selectedTitle
+      ],
+      "revealed": [
+          {
+              "index_interval_start": this.sectionBeforeStartIndex,
+              "index_interval_end": this.sectionBeforeEndIndex,
+              "revealed_score": 0,
+          },
+          {
+              "index_interval_start": this.startIndexofSelected,
+              "index_interval_end": this.endIndexofSelected,
+              "revealed_score": 1,
+          },
+          {
+            "index_interval_start": this.sectionAfterStartIndex,
+            "index_interval_end": this.sectionAfterEndIndex,
+            "revealed_score": 0,
+          }
+      ]
+  }
+    this.postParagraph(paragraph);
+  }
+  postParagraph(paragraph: any) {
+    console.log('Posting paragraph.')
+    fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(paragraph)
+  }
+  )
+  .then((response) => console.log(response))
+  }
 
   goToNewComponent(){
     this.router.navigate(['/create-interaction-work']);
@@ -29,11 +87,32 @@ export class CreateOriginalWorkComponent {
 
   enableSaveButton() {
     this.isButtonSaveClicked = true;
-    // this.displayText = this.inputText;
   }
-  getSelectedLine() {
+
+  getInputText(){
+    this.inputTextinArray = this.inputText.split('\n');
+    console.log("entire input text is: " + this.inputTextinArray);
+  }
+
+  onLineClick(index : number) {
+    this.selectedLineIndex = index;
     this.lineSelected = true;
-    console.log("title sentence is" + this.selectedLine);
+    this.selectedTitle = this.inputTextinArray[this.selectedLineIndex];
+    this.inputTextinArrayWithBreak = this.inputTextinArray.join('<br>')
+
+    console.log("title sentence is" + this.selectedTitle);
+    console.log("type of inputTextinArray is: " + typeof this.inputTextinArray);
+    console.log("type of inputTextinArrayWithBreak is: " + typeof this.inputTextinArrayWithBreak);
+
+    this.startIndexofSelected = this.inputTextinArrayWithBreak.indexOf(this.selectedTitle);
+    this.endIndexofSelected = this.startIndexofSelected + this.selectedTitle.length -1;
+
+    this.sectionBeforeStartIndex = 0;
+    this.sectionBeforeEndIndex = this.startIndexofSelected - 1;
+    this.sectionBefore = this.inputTextinArrayWithBreak.slice(this.sectionBeforeStartIndex, this.sectionBeforeEndIndex + 1);
+    this.sectionAfterStartIndex = this.endIndexofSelected + 1;
+    this.sectionAfterEndIndex = this.inputTextinArrayWithBreak.length - 1;
+    this.sectionAfter = this.inputTextinArrayWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);
   }
 
   goToOwnerView() {

@@ -43,6 +43,8 @@ export class CreateInteractionWorkComponent implements OnInit {
   rewritingSection2 = '';
   sorted = false;
   inputTextResorted : string[] = [];
+  inputTextResortedWithBreak: string = " "; // resorted text w/ <br> in between each lines as one single string
+  // inputTextResortedInLines : string[][] = []; //an array of arrays of strings
   disabledItemId = 'text2';
   items = [
     { id: 'text1', rows: '6',  placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
@@ -54,6 +56,14 @@ export class CreateInteractionWorkComponent implements OnInit {
   selectedLineIndex = -1;
   lineSelected = false;
   nextSentenceForParallel = '';
+  startIndexofSelected = -1;
+  endIndexofSelected = -1;
+  sectionBeforeStartIndex = 0;
+  sectionBeforeEndIndex = 0;
+  sectionBefore: string = " ";
+  sectionAfterStartIndex = 0;
+  sectionAfterEndIndex = 0;
+  sectionAfter: string = " ";
 
   // var for fetching paragraphs from database
   paragraph: any = undefined; //entire paragraph data structure
@@ -97,8 +107,6 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then((response) => response.json())
     .then((data => {
       this.paragraph = data;
-      // this.entireParagraph = data.paragraph;
-      // console.log(this.paragraph);
       this.generateParagraph();
     }));
   }
@@ -126,31 +134,30 @@ export class CreateInteractionWorkComponent implements OnInit {
   publishNewParagraph() {
     console.log("Publish new paragraph.");
     console.log(this.inputTextResorted);
-    // following-to-be-auto-calculated-by-code
     let paragraph = {
-      "title": 'the title rewriting user select',
-      "title_interval_start": 439,
-      "title_interval_end": 476,
+      "title": this.nextSentenceForParallel,
+      "title_interval_start": this.startIndexofSelected,
+      "title_interval_end": this.endIndexofSelected,
       "paragraph": this.inputTextResorted.join('<br>'),
       "id": Date.now(),
       "creator_id": localStorage.getItem('userid'),
       "parallel_sentences": [
-        "the title rewriting user select"
+        this.nextSentenceForParallel
       ],
       "revealed": [
           {
-              "index_interval_start": 0,
-              "index_interval_end": 20,
+              "index_interval_start": this.sectionBeforeStartIndex,
+              "index_interval_end": this.sectionBeforeEndIndex,
               "revealed_score": 0,
           },
           {
-              "index_interval_start": 20,
-              "index_interval_end": 476,
+              "index_interval_start": this.startIndexofSelected,
+              "index_interval_end": this.endIndexofSelected,
               "revealed_score": 1,
           },
           {
-            "index_interval_start": 20,
-            "index_interval_end": 476,
+            "index_interval_start": this.sectionAfterStartIndex,
+            "index_interval_end": this.sectionAfterEndIndex,
             "revealed_score": 0,
           }
       ]
@@ -161,7 +168,6 @@ export class CreateInteractionWorkComponent implements OnInit {
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
-      // & sending cookies
       method: 'POST',
       mode: 'cors',
       body: JSON.stringify(paragraph)
@@ -248,12 +254,18 @@ export class CreateInteractionWorkComponent implements OnInit {
   // if click button, get resorted texts, update button
   getSortedItems() {
     // if (this.sorted) {
-      // iterate through items[], create new array containing only the text property of each object
+      // iterate through items[], create inputTextResorted[] containing only the text property of each object
+      // numbers of elements in inputTextResorted[] is same as number of lines the rewriting work 
       this.inputTextResorted = this.items.map(item => item.text).join('\n').split('\n');
+      this.inputTextResortedWithBreak = this.inputTextResorted.join('<br>')
+      // this.inputTextResortedInLines = this.items.map(item => item.text.split('\n'));
+      // this.inputTextResortedInOneString = this.inputTextResortedInLines.flatMap(lines => lines).join('\n');
+
       this.items[0].disabled = this.items[1].disabled = this.items[2].disabled = true;
       this.isButtonSaveClicked = true;
       this.interactionInstruction1 = "Select one sentence as title. This will be the only visible text among all by default and will be used to continue the parallel piece.";
       this.currentReveal = 100;
+      console.log("inputTextResortedWithBreak is" + this.inputTextResortedWithBreak);
     // }
   }
 
@@ -261,7 +273,17 @@ export class CreateInteractionWorkComponent implements OnInit {
   onLineClick(index : number) {
     this.selectedLineIndex = index;
     this.lineSelected = true;
+    
     this.nextSentenceForParallel = this.inputTextResorted[this.selectedLineIndex];
+    this.startIndexofSelected = this.inputTextResortedWithBreak.indexOf(this.nextSentenceForParallel);
+    this.endIndexofSelected = this.startIndexofSelected + this.nextSentenceForParallel.length -1;
+
+    this.sectionBeforeStartIndex = 0;
+    this.sectionBeforeEndIndex = this.startIndexofSelected - 1;
+    this.sectionBefore = this.inputTextResortedWithBreak.slice(this.sectionBeforeStartIndex, this.sectionBeforeEndIndex + 1);
+    this.sectionAfterStartIndex = this.endIndexofSelected + 1;
+    this.sectionAfterEndIndex = this.inputTextResortedWithBreak.length - 1;
+    this.sectionAfter = this.inputTextResortedWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);
   }
 
   hideResortableList(form: HTMLFormElement) {

@@ -31,23 +31,32 @@
 <!-- Display Full Original work -->
 <div style="white-space: pre-line">
     <p *ngIf="isButtonSaveClicked">Your Original work:</p>
+
+    <!-- selct sentence to publish -->
     <div *ngIf="isButtonSaveClicked">
-        <div *ngFor="let line of inputText.split('\n')" (click)="selectedLine = line; lineSelected = true;" [ngClass]="{'selected': selectedLine === line}" style="cursor: pointer;" >
-            {{line}}
+        <div *ngFor="let line of inputTextinArray; let i = index" 
+        [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
+            {{ line }}
         </div>
     </div>
+
+    <!-- <div *ngIf="isButtonSaveClicked">
+        <div *ngFor="let line of inputText.split('\n')" (click)="selectedLine = line;">
+            {{line}}
+        </div>
+    </div> -->
 </div>
 
 <!-- "Save" button -->
 <!-- shown when "Save" not clicked & disabled when no input texts -->
 <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
-<button  *ngIf="!isButtonSaveClicked" (click)="enableSaveButton()" [disabled]="!inputText" >
+<button  *ngIf="!isButtonSaveClicked" (click)="enableSaveButton(); getInputText()" [disabled]="!inputText" >
     Save
 </button>
 
 <!-- "Publish" button -->
 <!-- shown when "Save" is clicked & disabled when no line selected -->
-<button *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); getSelectedLine()" [disabled]="!lineSelected">
+<button *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); publishNewParagraph()" [disabled]="!lineSelected">
     Publish
 </button>
 <!-- ;fromCreateInteractionWorkComponent=true -->

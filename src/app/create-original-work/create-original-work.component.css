@@ -30,6 +30,16 @@ textarea {
 } */
 
 /* select line to publish instrction */
+/* .selected {
+  background-color: #a6c0f4;
+} */
+
+/* select line to publish instrction */
+.not-selected {
+  cursor: pointer;
+}
+
 .selected {
   background-color: #a6c0f4;
+  cursor: default;
 }

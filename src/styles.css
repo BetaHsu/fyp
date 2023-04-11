@@ -98,4 +98,5 @@ button {
 .substring--hidden {
     background-color: #666;
     color: transparent;
+    user-select: none;
 }
