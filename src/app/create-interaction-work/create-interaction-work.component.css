@@ -20,9 +20,9 @@
     clear: both;
   }
   
-  textarea {
+  .drag-textarea {
     width: 100%;
-    padding: 12px 20px;
+    padding: 12px 20px 12px 38px;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -46,6 +46,17 @@
   /* drop targets */
   .box.over {
     border: 3px dotted #666;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .drag-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px;
   }
 
   /* Drag & Drop */

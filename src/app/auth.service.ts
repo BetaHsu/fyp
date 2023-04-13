@@ -17,29 +17,53 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
+  userStatus: any;
+  instruction: string = " ";
 
-  signup(email: string, password: string): any {
+  signup(username: string, email: string, password: string): any {
     return fetch((environment.apiUrl + "/api/v1/signup"), {
       method: 'POST',
       mode: 'cors',
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password, isSigningUp: true })
+      body: JSON.stringify({ username, email, password, isSigningUp: true })
     })
-      .then((response) => response.json())
-
+    .then(async (response) => { // return another promise
+      const json = await response.json(); // wait until the Promise:response.json() is done, put into var json
+      if (response.ok) { //200-299 (successful)
+        json.instruction = "Successfully signed up";
+      } else {
+        json.instruction = "Failed to sign up"
+      }
+      return json; //convert response body, JSON-formatted string, to JavaScript object
+    })
   }
 
-  signin(email: string, password: string): any {
+  signin(username: string, email: string, password: string) {
     return fetch((environment.apiUrl + "/api/v1/signup"), {
       method: 'POST',
       mode: 'cors',
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password, isSigningUp: false })
+      body: JSON.stringify({ username, email, password, isSigningUp: false })
     })
-      .then((response) => response.json())
+      .then(async (response) => { // return another promise
+        // let temp:any = {hi: "beta"};
+        // temp.instruction = "sth";
+        // Response object contains response body, headers, status code
+        const json = await response.json(); // wait until the Promise:response.json() is done, put into var json
+        if (response.ok) { //200-299 (successful)
+          json.instruction = "Successfully signed in";
+        } else {
+          json.instruction = "Failed to sign in"
+        }
+        return json; //convert response body, JSON-formatted string, to JavaScript object
+      })
+  }
+
+  getInstruction(): string {
+    return this.instruction;
   }
 }

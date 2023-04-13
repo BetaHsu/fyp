@@ -15,7 +15,7 @@ const routes: Routes = [
     component: CreateOriginalWorkComponent
   },
   {
-    path: 'create-interaction-work', 
+    path: 'create-interaction-work/:id', 
     component: CreateInteractionWorkComponent
   },
   {

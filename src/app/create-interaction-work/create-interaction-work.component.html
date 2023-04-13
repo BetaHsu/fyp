@@ -20,34 +20,29 @@
             <li *ngFor="let view of views; let i = index" (click)="setView(i)">{{view}}</li>
         </ul>
     </div>
-
-    
 </div>
-<h2 #title style="text-align:center">{{ workTitle }}</h2>
-<!-- title & creator----------------  -->
-<div class="display--flex justify-content--flex-start">
-    <p style="color: rgb(130, 130, 130)">( you are viewing title + {{currentReveal}}% of the work)</p>
-</div>
-<div class="display--flex justify-content--flex-end">
-    <p>@betaHsu</p>
-</div>
-
+<h2 #title style="text-align:center">{{ currentTitle }}</h2>
 <!-- <button (click)="testAPI()">Test API</button> -->
 
-<!--Interaction View---------------- -->
+<!--Interaction View------------------- -->
 <div *ngIf="view==0">
+    <!-- creator & reveal score ----------------  -->
+    <div class="display--flex justify-content--flex-start">
+        <p style="color: rgb(130, 130, 130)">( you are viewing title + {{currentRevealScoreToPublic}}% of the work)</p>
+    </div>
+    <div class="display--flex justify-content--flex-end">
+        <p>@{{ originalCreator }}</p>
+    </div>
+
     <div class="row">
         <!-- Original work & Re-writing work-->
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
-            <!-- partially visible paragraph -->
-            <!-- <p *ngIf="isButtonSaveClicked==false" [innerHTML]="output"></p> -->
+            <!-- if not "Save", show partially visible paragraph -->
             <p *ngIf="isButtonSaveClicked==false" [innerHTML]="entireParagraphWithSpanBreak"></p>
-            <!-- fully visible paragraph -->
+            <!-- if "Save", show fully visible paragraph -->
             <p *ngIf="isButtonSaveClicked==true">{{ entireParagraphWithoutBreak }}</p>
 
-            <!-- show paragraph fetched -->
-            <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
@@ -56,10 +51,12 @@
             <!-- resortable list for 3 input fields -->
             <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
                 <div *ngFor="let item of items; let i = index" cdkDrag>
-                    <span class="material-symbols-outlined">
-                        drag_indicator
-                    </span>
-                    <textarea [id]="'text' + i" [rows]="item.rows"
+                    <div class="input-wrapper">
+                        <span class="material-symbols-outlined drag-handle">
+                            drag_indicator
+                        </span>
+                    </div>
+                    <textarea class="drag-textarea" [id]="'text' + i" [rows]="item.rows"
                     [placeholder]="item.placeholder?.trim()" [(ngModel)]="item.text" 
                     [name]="'item-' + i" [ngModelOptions]="{standalone: true}" 
                     [disabled]="item.disabled" ></textarea>
@@ -96,14 +93,21 @@
         <!-- Parallel work -->
         <div class="column" style="background-color:rgb(250, 250, 250);">
             <h4>Parallel collaborative work</h4>
-            <p style="font-weight: bold">{{ workTitle }}</p>  
-            <!-- <p>{{ entireParagraphWithBreak }}</p> -->
+            <p style="font-weight: bold">{{ currentTitle }}</p>  
         </div>
     </div>
 </div>
 
-<!--Community View---------------- -->
+<!--Community View------------------- -->
 <div *ngIf="view==1">
+    <!-- creator & reveal score ----------------  -->
+    <div class="display--flex justify-content--flex-start">
+        <p style="color: rgb(130, 130, 130)">( you are viewing title + 100% of the work)</p>
+    </div>
+    <div class="display--flex justify-content--flex-end">
+        <p>@{{ originalCreator }}</p>
+    </div>
+
     <div class="row">
         <!-- Original work & Re-writing work-->
         <div class="column" style="background-color:#ffffff;">
@@ -123,14 +127,22 @@
             <h4>Parallel collaborative work</h4>
             <p style="color: rgb(130, 130, 130)">You have contributed to the next sentence of the parallel work. Click each sentence to access other rewritings based on the same original work.</p>
             <br>
-            <p>{{ workTitle }}</p>
+            <p>{{ currentTitle }}</p>
             <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p>
         </div>
     </div>
 </div>
 
-<!--Public View---------------- -->
+<!--Public View---------------------- -->
 <div *ngIf="view==2">
+    <!-- creator & reveal score ----------------  -->
+    <div class="display--flex justify-content--flex-start">
+        <p style="color: rgb(130, 130, 130)">( you are viewing title + {{currentRevealScoreToPublic}}% of the work)</p>
+    </div>
+    <div class="display--flex justify-content--flex-end">
+        <p>@{{ originalCreator }}</p>
+    </div>
+
     <div class="row">
         <!-- Original work & Re-writing work-->
         <div class="column" style="background-color:#ffffff;">
@@ -146,13 +158,21 @@
         <!-- Parallel work -->
         <div class="column" style="background-color:rgb(250, 250, 250);">
             <h4>Parallel collaborative work</h4>
-            <p style="font-weight: bold">{{ workTitle }}</p>  
+            <p style="font-weight: bold">{{ currentTitle }}</p>  
         </div>
     </div>
 </div>
 
-<!--Owner View-->
+<!--Owner View------------------>
 <div *ngIf="view==3">
+    <!-- creator & reveal score ----------------  -->
+    <div class="display--flex justify-content--flex-start">
+        <p style="color: rgb(130, 130, 130)">( you are viewing title + 100% of the work)</p>
+    </div>
+    <div class="display--flex justify-content--flex-end">
+        <p>@{{ originalCreator }}</p>
+    </div>
+
     <div class="row">
         <!-- Original work & Re-writing work-->
         <div class="column" style="background-color:#ffffff;">
@@ -169,7 +189,7 @@
             <h4>Parallel collaborative work</h4>
             <p style="color: rgb(130, 130, 130)">Click each sentence to access others rewriting version or your original work.</p>
             <br>
-            <p>{{ workTitle }}</p>
+            <p>{{ currentTitle }}</p>
             <p *ngIf="selectedLineIndex !== undefined">{{ inputTextResorted[selectedLineIndex] }}</p>
         </div>
     </div>
