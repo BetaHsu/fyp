@@ -16,5 +16,11 @@ export class HomeComponent {
   viewParagraph(paragraphId: string){
     this.router.navigate(['/create-interaction-work', paragraphId]);
   }
+
+  signOut() {
+    localStorage.removeItem("userid");
+    localStorage.removeItem("username");
+    this.router.navigate(['/onboarding']);
+  }
   
 }

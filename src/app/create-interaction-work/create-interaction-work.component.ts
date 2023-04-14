@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Output, Input, OnInit  } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit} from '@angular/core';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 
@@ -11,7 +12,7 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./create-interaction-work.component.css'],
 })
 export class CreateInteractionWorkComponent implements OnInit {
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private router: Router) {
 
   }
   // initialize: load paragraph database & check if route from create-original-work page
@@ -23,19 +24,23 @@ export class CreateInteractionWorkComponent implements OnInit {
         this.view = 3;
       }
     })
+    const temp = localStorage.getItem("username")
+    if(temp){
+      this.localStorUsername = temp;
+    }
     this.getParagraph(currentParagraphId);
   }
 
   title = 'fyp';
-  workTitle: string = 'A long journey from bush to concrete';
   user: string | undefined = undefined;
   i = 0;
+  localStorUsername: any = undefined;
 
   // var for GET paragraphs from database
-  // currentParagraphId: any = undefined;
+  originalParagraphId: any = undefined;
   paragraph: any = undefined; //entire paragraph database
   allParallel: any = undefined; //entire parallel array
-  currentTitle: any = undefined; //current paragraph title
+  currentTitle: string = " "; //current paragraph title
   originalCreator: any = undefined;
   currentRevealScoreToPublic = 0;
 
@@ -58,7 +63,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   disabledItemId = 'text2';
   items = [
     { id: 'text1', rows: '6',  placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
-    { id: 'text2', rows: '2',  text: this.workTitle, disabled: true },
+    { id: 'text2', rows: '2',  text: this.currentTitle, disabled: true },
     { id: 'text3', rows: '6',  placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
   ];
 
@@ -113,11 +118,12 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then((response) => response.json()) // json turns into 'data' variable for next
     // take json turn it to js object. json turns into 'data' variable for next
     .then((data => {
-      console.log("/api/v1/get-paragraph + paragraphId works!!");
       this.paragraph = data;
       this.allParallel = data.parallel_sentences;
-      this.currentTitle = data.title;
       this.generateParagraph();
+      this.items[1].text = this.currentTitle = data.title;
+      this.originalParagraphId = data.id;
+      // console.log(this.currentTitle);    
     }));
   }
 
@@ -137,6 +143,9 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.entireParagraphWithSpanBreak = this.output;
     this.currentRevealScoreToPublic = this.paragraph.reveal_score_to_public;
     this.originalCreator = this.paragraph.creator_username;
+    console.log("entireParagraphWithoutBreak is: " + this.entireParagraphWithoutBreak);
+    // console.log("this.output is: " + this.output);
+    console.log("entireParagraphWithSpanBreak is: " + this.entireParagraphWithSpanBreak);
     // this.entireParagraphWithBreak = text.replace(/([.,;?!])(\s|$)/g, '$1<br>');
     // this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
   }
@@ -159,7 +168,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       "parallel_sentences": [
         {
           "id": this.newParagraphId,
-          "title": this.nextSentenceForParallel,
+          "sentence": this.nextSentenceForParallel,
         }
       ],
       "revealed": [
@@ -181,16 +190,16 @@ export class CreateInteractionWorkComponent implements OnInit {
       ]
   }
     this.postParagraph(paragraph);
-    this.postSentenceToParallel(this.nextSentenceForParallel)
+    this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel)
   }
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
       method: 'POST',
       mode: 'cors',
-      headers: {
-        "Content-Type": "application/json",
-      },
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
       body: JSON.stringify(paragraph)
   }
   )
@@ -199,15 +208,20 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // ------ Flask "POST" : Post sentence to parallel -------------------
 
-  postSentenceToParallel(sentence: any) {
+  postSentenceToParallel(originalParagraphId:any, id:any, sentence: any) {
     console.log('Posting sentence to parallel.')
+    const data = {
+      originalParagraphId: originalParagraphId,
+      id: id,
+      sentence: sentence
+    };
     fetch((environment.apiUrl + "/api/v1/post-sentence-to-parallel"), {
       method: 'POST',
       mode: 'cors',
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(sentence)
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: JSON.stringify(data)
   }
   )
   .then((response) => console.log(response))
@@ -297,15 +311,21 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.endIndexofSelected = this.startIndexofSelected + this.nextSentenceForParallel.length -1;
 
     this.sectionBeforeStartIndex = 0;
-    this.sectionBeforeEndIndex = this.startIndexofSelected - 1;
+    this.sectionBeforeEndIndex = this.startIndexofSelected;
     this.sectionBefore = this.inputTextResortedWithBreak.slice(this.sectionBeforeStartIndex, this.sectionBeforeEndIndex + 1);
-    this.sectionAfterStartIndex = this.endIndexofSelected + 1;
-    this.sectionAfterEndIndex = this.inputTextResortedWithBreak.length - 1;
+    this.sectionAfterStartIndex = this.endIndexofSelected;
+    this.sectionAfterEndIndex = this.inputTextResortedWithBreak.length;
     this.sectionAfter = this.inputTextResortedWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);
   }
 
   hideResortableList(form: HTMLFormElement) {
     form.hidden = true;
+  }
+
+  signOut() {
+    localStorage.removeItem("userid");
+    localStorage.removeItem("username");
+    this.router.navigate(['/onboarding']);
   }
 }
 

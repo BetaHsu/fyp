@@ -1,4 +1,5 @@
 <!-- top-nav-bar ------------------ -->
+<img src="src/assets/image/Re-collect logo.png" alt="Logo" />
 <div class="display--flex justify-content--flex-end">
     <span class="material-symbols-outlined">
         search
@@ -6,23 +7,25 @@
     <span class="material-symbols-outlined">
         person
     </span>
+    <p>@{{ localStorUsername }}</p>
+    <button (click)="signOut()">Log out</button>
 </div>
 
 <h2 style="text-align:center">Create Original Work</h2>
 
 <!-- title & creator----------------  -->
-<div class="display--flex justify-content--flex-start">
-</div>
-<div class="w3-border">
+<!-- <div class="display--flex justify-content--flex-start">
+</div> -->
+<!-- <div class="w3-border">
     <div class="w3-grey" style="height:24px;width:20%"></div>
-</div>
-<p style="color: rgb(130, 130, 130)">To start, submit at least one original work of yours to enable interacting with other works</p>
-<!-- input text ------------------>
+</div> -->
 <div class="display--flex justify-content--flex-end">
-    <p>@originalcreator1</p>
+    <p>@{{ localStorUsername }}</p>
 </div>
-<div class="textarea-container">
-    <textarea [(ngModel)]="inputText" *ngIf="!isButtonSaveClicked" 
+<div class="auth-container">
+<p style="color: rgb(130, 130, 130)">To start, submit at least one original work of yours to enable interacting with other works</p>
+<div>
+    <textarea class="textarea-create-original" [(ngModel)]="inputText" *ngIf="!isButtonSaveClicked" 
     id="originalParagraph" rows="20" 
     placeholder="Write your original work here"></textarea>
 
@@ -50,13 +53,13 @@
 <!-- "Save" button -->
 <!-- shown when "Save" not clicked & disabled when no input texts -->
 <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
-<button  *ngIf="!isButtonSaveClicked" (click)="enableSaveButton(); getInputText()" [disabled]="!inputText" >
+<button type="submit" *ngIf="!isButtonSaveClicked" (click)="enableSaveButton(); getInputText()" [disabled]="!inputText" >
     Save
 </button>
 
 <!-- "Publish" button -->
 <!-- shown when "Save" is clicked & disabled when no line selected -->
-<button *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); publishNewParagraph()" [disabled]="!lineSelected">
+<button type="submit" *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); publishNewParagraph()" [disabled]="!lineSelected">
     Publish
 </button>
-<!-- ;fromCreateInteractionWorkComponent=true -->
+</div>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input  } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit  } from '@angular/core';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -16,6 +16,14 @@ export class CreateOriginalWorkComponent {
   constructor(private router: Router) {
 
   }
+  localStorUsername: any = undefined;
+  ngOnInit(): void {
+    const temp = localStorage.getItem("username")
+    if(temp){
+      this.localStorUsername = temp;
+    }
+  }
+
   isButtonSaveClicked = false;
   entireOriginalInput = '';
   originalSection1 = '';
@@ -117,6 +125,12 @@ export class CreateOriginalWorkComponent {
 
   goToOwnerView() {
     this.router.navigate(['/create-interaction-work'], { queryParams: {fromCreateOriginalWork: true}})
+  }
+
+  signOut() {
+    localStorage.removeItem("userid");
+    localStorage.removeItem("username");
+    this.router.navigate(['/onboarding']);
   }
 }
 

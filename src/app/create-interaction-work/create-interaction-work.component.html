@@ -1,4 +1,5 @@
 <!-- top-nav-bar ------------------ -->
+<img src="src/assets/image/Re-collect logo.png" alt="Logo" />
 <div class="display--flex justify-content--flex-end">
     <span class="material-symbols-outlined">
         search
@@ -6,6 +7,8 @@
     <span class="material-symbols-outlined">
         person
     </span>
+    <p>@{{ localStorUsername }}</p>
+    <button (click)="signOut()">Log out</button>
 </div>
 <!-- Drop-Down for different views----------------  -->
 <div class="display--flex justify-content--space-between">
@@ -113,7 +116,7 @@
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <p [innerHTML]="entireParagraphWithoutBreak"></p>
+            <p [innerHTML]="entireParagraphWithBreak"></p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>

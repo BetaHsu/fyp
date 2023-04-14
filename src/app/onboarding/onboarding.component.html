@@ -1,4 +1,5 @@
 <!-- top-nav-bar ------------------ -->
+<img src="src/assets/image/Re-collect logo.png" alt="Logo" />
 <div class="display--flex justify-content--flex-end">
     <span class="material-symbols-outlined">
         search
@@ -30,5 +31,7 @@
         {{ isSigningUp ? 'Already have an account? Sign in' : 'New to "Re-collect" ? Sign up' }}
     </button>
     <p>{{ errorMessage }}</p>
+    <p *ngIf="signInSuccess">Sign In Successful!</p>
+    <button  type="welcome" *ngIf="signInSuccess" (click)="goToCreateOriginalWork()"> Enter Re-collect</button>
 </div>
 

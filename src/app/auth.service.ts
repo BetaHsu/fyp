@@ -55,7 +55,7 @@ export class AuthService {
         // Response object contains response body, headers, status code
         const json = await response.json(); // wait until the Promise:response.json() is done, put into var json
         if (response.ok) { //200-299 (successful)
-          json.instruction = "Successfully signed in";
+          json.instruction = " ";
         } else {
           json.instruction = "Failed to sign in"
         }

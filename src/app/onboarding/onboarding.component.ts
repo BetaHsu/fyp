@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../auth.service'; 
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-onboarding',
@@ -7,14 +8,17 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./onboarding.component.css']
 })
 export class OnboardingComponent {
+
   username: string = '';
   email: string = '';
   password: string = '';
   isSigningUp: boolean = true;
   message: string = '';
   errorMessage : string = '';
+  signInSuccess = false;
+  isErrorMessage = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) { }
 
   onSubmit(): void {
     // Sign Up
@@ -28,16 +32,13 @@ export class OnboardingComponent {
     } else {
       this.authService.signin(this.username, this.email, this.password).then((user: { userid: string; instruction:string }) => {
         //take iuserid & nstruciton from json result
-        if (user.userid) {
+        if (user.userid) { // if successful
           //so userid can be accessed/used across application in different components and services
           localStorage.setItem("userid", user.userid)
-          // localStorage.removeItem("userid") 
-          // localStorage.setItem("username", user.name) 
-          // const temp = localStorage.getItem("userid")
-          // if(temp){
-          //   this.currentUserId = temp
-          // }
-          
+          localStorage.setItem("username", this.username) 
+          this.signInSuccess = true;
+        } else {
+          this.isErrorMessage = true;
         }
         this.errorMessage = user.instruction;
       })
@@ -45,6 +46,9 @@ export class OnboardingComponent {
   }
   toggleSignIn(): void {
     this.isSigningUp = !this.isSigningUp;
+  }
+  goToCreateOriginalWork() {
+    this.router.navigate(['/create-original-work']);
   }
 }
 
