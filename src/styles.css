@@ -83,6 +83,11 @@ button {
     text-decoration: underline;
 }
 
+.dropdown__options li.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .material-symbols-outlined {
   font-variation-settings:
   'FILL' 0,

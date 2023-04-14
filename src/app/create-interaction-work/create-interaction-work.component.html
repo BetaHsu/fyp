@@ -20,7 +20,10 @@
             </span>
         </div>
         <ul class="dropdown__options" *ngIf="dropdownActive">
-            <li *ngFor="let view of views; let i = index" (click)="setView(i)">{{view}}</li>
+            <li *ngFor="let view of views; let i = index" [class.disabled]="!can_access_views[i]" 
+            (click)="can_access_views[i] && setView(i)">
+                {{view}}
+            </li>
         </ul>
     </div>
 </div>

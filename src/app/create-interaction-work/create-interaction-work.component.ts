@@ -5,6 +5,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import ObjectId from 'bson-objectid';
 
 @Component({
   selector: 'app-create-interaction-work',
@@ -15,7 +16,8 @@ export class CreateInteractionWorkComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router) {
 
   }
-  // initialize: load paragraph database & check if route from create-original-work page
+  // Initialize: load paragraph database & check if route from create-original-work page 
+  // & get username from local storage
   ngOnInit(): void {
     const currentParagraphId = this.route.snapshot.params['id'];
     console.log("currentParagraphId is: " + currentParagraphId);
@@ -49,6 +51,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   views = ['Interaction', 'Community', 'Public', 'Owner'];
   dropdownActive = false;
   isButtonSaveClicked = false;
+  can_access_views = [false, true, true, false];
 
   // var for Drag and Drop input fields
   input: string = " ";
@@ -98,13 +101,18 @@ export class CreateInteractionWorkComponent implements OnInit {
   interactionInstruction1 = "Create rewriting of the piece using title sentence";
 
   testAPI() {
-    //throw new Error('Method not implemented.');
     fetch((environment.apiUrl + "/api/test"), {
       method: 'GET',
       mode: 'cors'
     })
     .then((response) => response.json).then((json) => console.log(json))
   }
+
+  // ------ Notes: ------------
+  // User Database: id is ['_id'] from MongoDB ObjectId
+  // Paragraph Database: id is ['_id'] from MongoDB ObjectId & another no-use ['id'] from dateTime just in case 
+  // LocalStorage store creator id & username once sign in, check from Inspect->Application->LocalStorage
+
 
   // ------ Flask "GET" : get paragraph-------------------
 
@@ -115,15 +123,15 @@ export class CreateInteractionWorkComponent implements OnInit {
         mode: 'cors'
     }
     )
-    .then((response) => response.json()) // json turns into 'data' variable for next
-    // take json turn it to js object. json turns into 'data' variable for next
+    .then((response) => response.json()) 
+    // turn json string to JS object
     .then((data => {
       this.paragraph = data;
       this.allParallel = data.parallel_sentences;
       this.generateParagraph();
       this.items[1].text = this.currentTitle = data.title;
-      this.originalParagraphId = data.id;
-      // console.log(this.currentTitle);    
+      this.originalParagraphId = data._id;  
+      console.log("originalParagraphId is:" + this.originalParagraphId)
     }));
   }
 
@@ -144,26 +152,26 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.currentRevealScoreToPublic = this.paragraph.reveal_score_to_public;
     this.originalCreator = this.paragraph.creator_username;
     console.log("entireParagraphWithoutBreak is: " + this.entireParagraphWithoutBreak);
-    // console.log("this.output is: " + this.output);
     console.log("entireParagraphWithSpanBreak is: " + this.entireParagraphWithSpanBreak);
     // this.entireParagraphWithBreak = text.replace(/([.,;?!])(\s|$)/g, '$1<br>');
     // this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
   }
 
-
   // ------ Flask "POST" : Post paragraph -------------------
   publishNewParagraph() {
     console.log("Publish new paragraph.");
-    console.log(this.inputTextResorted);
-    this.newParagraphId = Date.now().toString();
+    // console.log(this.inputTextResorted);
+    const objectId = new ObjectId();
+    this.newParagraphId = objectId.toString();
     let paragraph = {
       "title": this.nextSentenceForParallel,
       "title_interval_start": this.startIndexofSelected,
       "title_interval_end": this.endIndexofSelected,
       "paragraph": this.inputTextResorted.join('<br>'),
-      "id": this.newParagraphId,
-      "creator_id": localStorage.getItem('userid'), //??
-      "creator_username": "betaHsu3", //also get from localStorage??
+      "_id": this.newParagraphId,
+      "id": Date.now().toString(),
+      "creator_id": localStorage.getItem('userid'),
+      "creator_username": this.localStorUsername,
       "reveal_score_to_public": 0,
       "parallel_sentences": [
         {
@@ -208,11 +216,11 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // ------ Flask "POST" : Post sentence to parallel -------------------
 
-  postSentenceToParallel(originalParagraphId:any, id:any, sentence: any) {
+  postSentenceToParallel(originalParagraphId:any, newParagraphId:any, sentence: any) {
     console.log('Posting sentence to parallel.')
     const data = {
       originalParagraphId: originalParagraphId,
-      id: id,
+      newParagraphId: newParagraphId,
       sentence: sentence
     };
     fetch((environment.apiUrl + "/api/v1/post-sentence-to-parallel"), {
@@ -230,8 +238,7 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // ------ DropDown for different views -------------------
 
-  toggleDropdown() {
-    // Toggle the dropdown
+  toggleDropdown() {// Toggle the dropdown
     this.dropdownActive = !this.dropdownActive;
     console.log(this.dropdownActive);
   }
@@ -249,7 +256,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.displayTitle = val;
   }
 
-  // ------ Resort input fields --------------------------------
+  // ------ Resortable input fields --------------------------------
 
   drop(event: CdkDragDrop<any[]>) {
     const draggedItem = this.items[event.previousIndex];
@@ -301,14 +308,14 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.interactionInstruction1 = "Select one sentence as title. This will be the only visible text among all by default and will be used to continue the parallel piece.";
   }
 
-  // click on line as published title
+  // assign the line that is clicked as published title
   onLineClick(index : number) {
     this.selectedLineIndex = index;
     this.lineSelected = true;
     
     this.nextSentenceForParallel = this.inputTextResorted[this.selectedLineIndex];
     this.startIndexofSelected = this.inputTextResortedWithBreak.indexOf(this.nextSentenceForParallel);
-    this.endIndexofSelected = this.startIndexofSelected + this.nextSentenceForParallel.length -1;
+    this.endIndexofSelected = this.startIndexofSelected + this.nextSentenceForParallel.length;
 
     this.sectionBeforeStartIndex = 0;
     this.sectionBeforeEndIndex = this.startIndexofSelected;
