@@ -52,20 +52,20 @@ export class CreateOriginalWorkComponent {
   // ------ Flask "POST" : Post Original paragraph -------------------
   publishNewParagraph() {
     console.log("Publish new paragraph.");
-    const objectId = new ObjectId();
-    this.newParagraphObjectId = objectId;
+    // const objectId = new ObjectId();
+    // this.newParagraphObjectId = objectId;
     let paragraph = {
       "title": this.selectedTitle,
       "title_interval_start": this.startIndexofSelected,
       "title_interval_end": this.endIndexofSelected,
       "paragraph": this.inputTextinArrayWithBreak,
-      "_id": this.newParagraphObjectId,
+      // "_id": this.newParagraphObjectId,
       "id": Date.now().toString(),
       "creator_id": localStorage.getItem('userid'),
       "creator_username": this.localStorUsername,
       "parallel_sentences": [
         {
-          "id": this.newParagraphObjectId,
+          // "id": this.newParagraphObjectId,
           "sentence": this.selectedTitle,
         }
       ],
@@ -97,10 +97,18 @@ export class CreateOriginalWorkComponent {
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
       method: 'POST',
       mode: 'cors',
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(paragraph)
   }
   )
-  .then((response) => console.log(response))
+  .then((response) => response.json())
+  .then((data => {
+    this.newParagraphObjectId = data._id;
+    this.postWorkIdToUser(this.newParagraphObjectId, this.localStorUsername);
+  }
+  ))
   }
 
    // ------ Flask "POST" : Post work _id to user database -------------------
@@ -167,8 +175,8 @@ export class CreateOriginalWorkComponent {
     this.router.navigate(['/onboarding']);
   }
 
-  goToCreateOriginalWork() { // go to home instead
-    this.router.navigate(['/create-original-work']);
+  goToHome() { // go to home instead
+    this.router.navigate(['']);
   }
 }
 

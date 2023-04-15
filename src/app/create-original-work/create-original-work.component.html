@@ -1,12 +1,13 @@
 <!-- top-nav-bar ------------------ -->
 <img src="src/assets/image/Re-collect logo.png" alt="Logo" />
+<button  type="welcome" (click)="goToHome()"> home</button>
 <div class="display--flex justify-content--flex-end">
-    <span class="material-symbols-outlined">
+    <!-- <span class="material-symbols-outlined">
         search
     </span>
     <span class="material-symbols-outlined">
         person
-    </span>
+    </span> -->
     <p>@{{ localStorUsername }}</p>
     <button (click)="signOut()">Log out</button>
 </div>
@@ -62,5 +63,5 @@
 <button type="submit" *ngIf="isButtonSaveClicked" (click)="publishNewParagraph()" [disabled]="!lineSelected">
     Publish
 </button>
-<button  type="welcome" *ngIf="isPublished" (click)="goToOwnerView()"> Enter Re-collect</button>
+<button  type="welcome" *ngIf="isPublished" (click)="goToHome()"> Enter Re-collect</button>
 </div>

@@ -1,12 +1,13 @@
 <!-- top-nav-bar ------------------ -->
 <img src="src/assets/image/Re-collect logo.png" alt="Logo" />
+<button  type="home" (click)="goToHome()"> Home</button>
 <div class="display--flex justify-content--flex-end">
-    <span class="material-symbols-outlined">
+    <!-- <span class="material-symbols-outlined">
         search
     </span>
     <span class="material-symbols-outlined">
         person
-    </span>
+    </span> -->
     <p>@{{ localStorUsername }}</p>
     <button (click)="signOut()">Log out</button>
 </div>
@@ -100,6 +101,7 @@
         <div class="column" style="background-color:rgb(250, 250, 250);">
             <h4>Parallel collaborative work</h4>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
+            <p>{{ lastParallel }}</p>
         </div>
     </div>
 </div>
@@ -133,7 +135,8 @@
             <h4>Parallel collaborative work</h4>
             <p style="color: rgb(130, 130, 130)">You have contributed to the next sentence of the parallel work. Click each sentence to access other rewritings based on the same original work.</p>
             <br>
-            <p>{{ currentTitle }}</p>
+            <p style="font-weight: bold">{{ currentTitle }}</p>  
+            <p>{{ lastParallel }}</p>
             <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p>
         </div>
     </div>
@@ -165,6 +168,7 @@
         <div class="column" style="background-color:rgb(250, 250, 250);">
             <h4>Parallel collaborative work</h4>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
+            <p>{{ lastParallel }}</p>
         </div>
     </div>
 </div>
@@ -195,7 +199,8 @@
             <h4>Parallel collaborative work</h4>
             <p style="color: rgb(130, 130, 130)">Click each sentence to access others rewriting version or your original work.</p>
             <br>
-            <p>{{ currentTitle }}</p>
+            <p style="font-weight: bold">{{ currentTitle }}</p>  
+            <p>{{ lastParallel }}</p>
             <p *ngIf="selectedLineIndex !== undefined">{{ inputTextResorted[selectedLineIndex] }}</p>
         </div>
     </div>

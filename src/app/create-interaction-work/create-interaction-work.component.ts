@@ -60,7 +60,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   userWorks:string[]=[];
   allParallelSentencesSent : string[] = [];
   allParallelSentencesId : string[] = [];
-  can_access_views = [true, false, true, false];
+  can_access_views = [true, true, true, true]; //true, false, true, false
 
   // var for Drag and Drop input fields
   input: string = " ";
@@ -156,7 +156,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.allParallelSentencesId = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.id);
       this.currentId = this.route.snapshot.params['id'];
       // console.log("currentId is:" + this.currentId);
-      console.log("allParallelSentences sentence are:" + this.allParallelSentencesSent);
+      console.log("allParallelSentences sentence length are:" + this.allParallelSentencesSent.length);
       this.allParallel = data.parallel_sentences; // entire parallel_sentences Object, no use for now
       this.generateParagraph();
       this.items[1].text = this.currentTitle = data.title;
@@ -165,9 +165,28 @@ export class CreateInteractionWorkComponent implements OnInit {
         this.getUserRestriction();
       // }
       // return this.allParallelSentencesId;
+      this.renderParallel(this.allParallelSentencesSent);
     }));
   }
+  lastParallel:string=" ";
+  otherParallelText:string[] = [];
+  parallelPlaceholderLstring = ""
+  renderParallel(allParallelSentencesSent:any){
+    if (allParallelSentencesSent.length > 1){
+      this.lastParallel = allParallelSentencesSent[allParallelSentencesSent.length-1];
+      console.log("lastParallel is:" + this.lastParallel);
+    }
+    this.otherParallelText = allParallelSentencesSent.slice(1, -1);
+    console.log("otherParallelText is:" + this.otherParallelText);
 
+    // if (this.paragraph.revealed) {
+    //   this.paragraph.revealed.forEach((data: { index_interval_start: number, index_interval_end: number, revealed_score: number }) => {
+    //     this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' 
+    //     + text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
+    //   })
+    // }
+
+  }
   // Promise.all([getUserWorks(this.localStorUsername), getParagraph(this.route.snapshot.params['id'])])
   //   .then(() => {
   //     getUserRestriction();
@@ -222,21 +241,21 @@ export class CreateInteractionWorkComponent implements OnInit {
     console.log("Publish new paragraph.");
     // console.log(this.inputTextResorted);
     // const { ObjectId } = require('bson');
-    const objectId = new ObjectId();
-    this.newParagraphId = objectId;
+    // const objectId = new ObjectId();
+    // this.newParagraphId = objectId;
     let paragraph = {
       "title": this.nextSentenceForParallel,
       "title_interval_start": this.startIndexofSelected,
       "title_interval_end": this.endIndexofSelected,
       "paragraph": this.inputTextResorted.join('<br>'),
-      "_id": this.newParagraphId,
+      // "_id": this.newParagraphId,
       "id": Date.now().toString(),
       "creator_id": localStorage.getItem('userid'),
       "creator_username": this.localStorUsername,
       "reveal_score_to_public": 0,
       "parallel_sentences": [
         {
-          "id": this.newParagraphId,
+          // "id": " ",
           "sentence": this.nextSentenceForParallel,
         }
       ],
@@ -259,8 +278,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       ]
     }
     this.postParagraph(paragraph);
-    this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel);
-    this.postWorkIdToUser(this.newParagraphId, this.localStorUsername);
+    
   }
 
   postParagraph(paragraph: any) {
@@ -268,13 +286,19 @@ export class CreateInteractionWorkComponent implements OnInit {
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
       method: 'POST',
       mode: 'cors',
-      // headers: {
-      //   "Content-Type": "application/json",
-      // },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(paragraph)
   }
   )
-  .then((response) => console.log(response))
+  .then((response) => response.json())
+  .then((data => {
+    this.newParagraphId = data._id;
+    this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel);
+    this.postWorkIdToUser(this.newParagraphId, this.localStorUsername);
+  }
+  ))
   }
 
   // ------ Flask "POST" : Post sentence to parallel -------------------
@@ -411,6 +435,10 @@ export class CreateInteractionWorkComponent implements OnInit {
     localStorage.removeItem("userid");
     localStorage.removeItem("username");
     this.router.navigate(['/onboarding']);
+  }
+
+  goToHome() { // go to home instead
+    this.router.navigate(['']);
   }
 }
 

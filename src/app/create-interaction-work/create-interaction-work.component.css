@@ -87,3 +87,12 @@
     background-color: #a6c0f4;
     cursor: default;
   }
+
+ button[type="home"] {
+    background-color: none;
+    color: #000000;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
