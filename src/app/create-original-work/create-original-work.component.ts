@@ -5,6 +5,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import ObjectId from 'bson-objectid';
 
 @Component({
   selector: 'app-create-original-work',
@@ -25,6 +26,7 @@ export class CreateOriginalWorkComponent {
   }
 
   isButtonSaveClicked = false;
+  isPublished = false;
   entireOriginalInput = '';
   originalSection1 = '';
   originalSection2 = '';
@@ -45,18 +47,27 @@ export class CreateOriginalWorkComponent {
   sectionAfterEndIndex = 0;
   sectionAfter: string = " ";
 
-  // ------ Flask "POST" : Post paragraph -------------------
+  newParagraphObjectId: any = " ";
+
+  // ------ Flask "POST" : Post Original paragraph -------------------
   publishNewParagraph() {
     console.log("Publish new paragraph.");
+    const objectId = new ObjectId();
+    this.newParagraphObjectId = objectId;
     let paragraph = {
       "title": this.selectedTitle,
       "title_interval_start": this.startIndexofSelected,
       "title_interval_end": this.endIndexofSelected,
       "paragraph": this.inputTextinArrayWithBreak,
-      "id": Date.now(),
+      "_id": this.newParagraphObjectId,
+      "id": Date.now().toString(),
       "creator_id": localStorage.getItem('userid'),
+      "creator_username": this.localStorUsername,
       "parallel_sentences": [
-        this.selectedTitle
+        {
+          "id": this.newParagraphObjectId,
+          "sentence": this.selectedTitle,
+        }
       ],
       "revealed": [
           {
@@ -77,7 +88,10 @@ export class CreateOriginalWorkComponent {
       ]
   }
     this.postParagraph(paragraph);
+    this.postWorkIdToUser(this.newParagraphObjectId, this.localStorUsername);
+    this.isPublished = true;
   }
+
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
@@ -89,9 +103,23 @@ export class CreateOriginalWorkComponent {
   .then((response) => console.log(response))
   }
 
-  goToNewComponent(){
-    this.router.navigate(['/create-interaction-work']);
+   // ------ Flask "POST" : Post work _id to user database -------------------
+   postWorkIdToUser(workId: any, userName: any) {
+    console.log('Posting work _id to user database.')
+    const data = {
+      workId: workId,
+      userName: userName,
+    };
+    fetch((environment.apiUrl + "/api/v1/post-work-id-to-user"), {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(data)
+    }
+    )
+    .then((response) => console.log(response))
   }
+
+
 
   enableSaveButton() {
     this.isButtonSaveClicked = true;
@@ -113,24 +141,34 @@ export class CreateOriginalWorkComponent {
     console.log("type of inputTextinArrayWithBreak is: " + typeof this.inputTextinArrayWithBreak);
 
     this.startIndexofSelected = this.inputTextinArrayWithBreak.indexOf(this.selectedTitle);
-    this.endIndexofSelected = this.startIndexofSelected + this.selectedTitle.length -1;
+    this.endIndexofSelected = this.startIndexofSelected + this.selectedTitle.length;
 
     this.sectionBeforeStartIndex = 0;
-    this.sectionBeforeEndIndex = this.startIndexofSelected - 1;
+    this.sectionBeforeEndIndex = this.startIndexofSelected;
     this.sectionBefore = this.inputTextinArrayWithBreak.slice(this.sectionBeforeStartIndex, this.sectionBeforeEndIndex + 1);
-    this.sectionAfterStartIndex = this.endIndexofSelected + 1;
-    this.sectionAfterEndIndex = this.inputTextinArrayWithBreak.length - 1;
+    this.sectionAfterStartIndex = this.endIndexofSelected;
+    this.sectionAfterEndIndex = this.inputTextinArrayWithBreak.length;
     this.sectionAfter = this.inputTextinArrayWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);
   }
 
   goToOwnerView() {
-    this.router.navigate(['/create-interaction-work'], { queryParams: {fromCreateOriginalWork: true}})
+    this.router.navigate(['/create-interaction-work', this.newParagraphObjectId], { queryParams: {fromCreateOriginalWork: true}});
+  }
+
+
+  goToNewComponent(){
+    const id = this.newParagraphObjectId;
+    this.router.navigate(['/create-interaction-work'], { queryParams: {fromCreateOriginalWork: true}});
   }
 
   signOut() {
     localStorage.removeItem("userid");
     localStorage.removeItem("username");
     this.router.navigate(['/onboarding']);
+  }
+
+  goToCreateOriginalWork() { // go to home instead
+    this.router.navigate(['/create-original-work']);
   }
 }
 

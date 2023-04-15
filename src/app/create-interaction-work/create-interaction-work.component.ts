@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import ObjectId from 'bson-objectid';
+// import { Promise } from 'es6-promise';
 
 @Component({
   selector: 'app-create-interaction-work',
@@ -26,11 +27,12 @@ export class CreateInteractionWorkComponent implements OnInit {
         this.view = 3;
       }
     })
-    const temp = localStorage.getItem("username")
-    if(temp){
-      this.localStorUsername = temp;
+    const currentUsername = localStorage.getItem("username")
+    if(currentUsername){
+      this.localStorUsername = currentUsername;
     }
     this.getParagraph(currentParagraphId);
+    this.getUserWorks(this.localStorUsername);
   }
 
   title = 'fyp';
@@ -41,17 +43,24 @@ export class CreateInteractionWorkComponent implements OnInit {
   // var for GET paragraphs from database
   originalParagraphId: any = undefined;
   paragraph: any = undefined; //entire paragraph database
-  allParallel: any = undefined; //entire parallel array
   currentTitle: string = " "; //current paragraph title
   originalCreator: any = undefined;
   currentRevealScoreToPublic = 0;
+  allParallel: any = undefined; //entire parallel Object, not .sentence
+  currentId: string = " ";
 
   // var for drop down list to change view
   view = 0;
   views = ['Interaction', 'Community', 'Public', 'Owner'];
   dropdownActive = false;
   isButtonSaveClicked = false;
-  can_access_views = [false, true, true, false];
+
+  // var for restriction views
+  getUserWorksReady = false;
+  userWorks:string[]=[];
+  allParallelSentencesSent : string[] = [];
+  allParallelSentencesId : string[] = [];
+  can_access_views = [true, false, true, false];
 
   // var for Drag and Drop input fields
   input: string = " ";
@@ -89,7 +98,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   output: string = '';
   @Output() viewSelected = new EventEmitter<string>();
 
-  newParagraphId: string = " ";
+  newParagraphId: any = " ";
 
   // var for testing revealing & hidding sections of paragraph
   fullParagraph : any = undefined;
@@ -112,7 +121,24 @@ export class CreateInteractionWorkComponent implements OnInit {
   // User Database: id is ['_id'] from MongoDB ObjectId
   // Paragraph Database: id is ['_id'] from MongoDB ObjectId & another no-use ['id'] from dateTime just in case 
   // LocalStorage store creator id & username once sign in, check from Inspect->Application->LocalStorage
+  
+  // ------ Flask "GET" : Get user works -------------------
+  getUserWorks(username: string) {
+    console.log('Getting User work ids')
+    fetch((environment.apiUrl + "/api/v1/get-user-works/" + username), {
+        method: 'GET',
+        mode: 'cors'
+    }
+    )
+    .then((response) => response.json()) 
+    .then(data => {
+      this.userWorks = data as string[];
+      this.getUserWorksReady = true;
+      // console.log("user's works is" + this.userWorks);
 
+      // return this.userWorks;
+    });
+  }
 
   // ------ Flask "GET" : get paragraph-------------------
 
@@ -124,16 +150,29 @@ export class CreateInteractionWorkComponent implements OnInit {
     }
     )
     .then((response) => response.json()) 
-    // turn json string to JS object
     .then((data => {
       this.paragraph = data;
-      this.allParallel = data.parallel_sentences;
+      this.allParallelSentencesSent = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.sentence);
+      this.allParallelSentencesId = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.id);
+      this.currentId = this.route.snapshot.params['id'];
+      // console.log("currentId is:" + this.currentId);
+      console.log("allParallelSentences sentence are:" + this.allParallelSentencesSent);
+      this.allParallel = data.parallel_sentences; // entire parallel_sentences Object, no use for now
       this.generateParagraph();
       this.items[1].text = this.currentTitle = data.title;
       this.originalParagraphId = data._id;  
-      console.log("originalParagraphId is:" + this.originalParagraphId)
+      // if (this.getUserWorksReady) {
+        this.getUserRestriction();
+      // }
+      // return this.allParallelSentencesId;
     }));
   }
+
+  // Promise.all([getUserWorks(this.localStorUsername), getParagraph(this.route.snapshot.params['id'])])
+  //   .then(() => {
+  //     getUserRestriction();
+  //   })
+  
 
   generateParagraph() {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
@@ -157,12 +196,34 @@ export class CreateInteractionWorkComponent implements OnInit {
     // this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
   }
 
+  // corresponded to change views = ['Interaction', 'Community', 'Public', 'Owner'];
+  getUserRestriction() {
+    if (this.getUserWorksReady) {
+      console.log("this.userWork is:" + this.userWorks);
+      console.log("this.currentId is:" + this.currentId);
+      console.log("this.allParallelSentencesId is:" + this.allParallelSentencesId);
+      if (this.userWorks.includes(this.currentId)){ 
+        // is owner
+        this.can_access_views = [false, false, true, true];
+        console.log("is owner!")
+      } else if (this.allParallelSentencesId.some(element => this.userWorks.includes(element))) { 
+        // is community member
+        this.can_access_views = [false, true, true, false];
+        console.log("is community member!")
+      } else { // is general public
+        this.can_access_views = [true, false, true, false];
+        console.log("is public!")
+      }
+    }
+  }
+  
   // ------ Flask "POST" : Post paragraph -------------------
   publishNewParagraph() {
     console.log("Publish new paragraph.");
     // console.log(this.inputTextResorted);
+    const { ObjectId } = require('bson');
     const objectId = new ObjectId();
-    this.newParagraphId = objectId.toString();
+    this.newParagraphId = objectId;
     let paragraph = {
       "title": this.nextSentenceForParallel,
       "title_interval_start": this.startIndexofSelected,
@@ -196,10 +257,12 @@ export class CreateInteractionWorkComponent implements OnInit {
             "revealed_score": 0,
           }
       ]
-  }
+    }
     this.postParagraph(paragraph);
-    this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel)
+    this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel);
+    this.postWorkIdToUser(this.newParagraphId, this.localStorUsername);
   }
+
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
@@ -230,11 +293,26 @@ export class CreateInteractionWorkComponent implements OnInit {
       //   "Content-Type": "application/json",
       // },
       body: JSON.stringify(data)
-  }
+    }
   )
   .then((response) => console.log(response))
   }
 
+   // ------ Flask "POST" : Post work _id to user database -------------------
+   postWorkIdToUser(workId: any, userName: any) {
+    console.log('Posting work _id to user database.')
+    const data = {
+      workId: workId,
+      userName: userName,
+    };
+    fetch((environment.apiUrl + "/api/v1/post-work-id-to-user"), {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(data)
+    }
+    )
+    .then((response) => console.log(response))
+  }
 
   // ------ DropDown for different views -------------------
 

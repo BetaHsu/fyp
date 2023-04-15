@@ -59,7 +59,8 @@
 
 <!-- "Publish" button -->
 <!-- shown when "Save" is clicked & disabled when no line selected -->
-<button type="submit" *ngIf="isButtonSaveClicked" (click)="goToOwnerView(); publishNewParagraph()" [disabled]="!lineSelected">
+<button type="submit" *ngIf="isButtonSaveClicked" (click)="publishNewParagraph()" [disabled]="!lineSelected">
     Publish
 </button>
+<button  type="welcome" *ngIf="isPublished" (click)="goToOwnerView()"> Enter Re-collect</button>
 </div>

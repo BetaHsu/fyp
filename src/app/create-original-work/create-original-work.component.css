@@ -33,7 +33,7 @@
   resize: none;
 }
 
-button[type="submit"] {
+button[type="submit"], button[type="welcome"]  {
   width: 40%;
   background-color: #797979;
   color: #fff;
