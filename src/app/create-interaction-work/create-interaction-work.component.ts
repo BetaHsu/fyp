@@ -221,7 +221,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   publishNewParagraph() {
     console.log("Publish new paragraph.");
     // console.log(this.inputTextResorted);
-    const { ObjectId } = require('bson');
+    // const { ObjectId } = require('bson');
     const objectId = new ObjectId();
     this.newParagraphId = objectId;
     let paragraph = {
