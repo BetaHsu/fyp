@@ -1,12 +1,14 @@
 <!-- top-nav-bar ------------------ -->
-<img src="src/assets/image/Re-collect logo.png" alt="Logo" />
+<img src="assets/image/Re-collect logo.png" alt="Logo" style="
+width: 8%;"/>
 <div class="display--flex justify-content--flex-end">
     <!-- <span class="material-symbols-outlined">
         search
-    </span>
+    </span> -->
     <span class="material-symbols-outlined">
         person
-    </span> -->
+    </span>
+    <p>{{ localStorUsername }}</p>
     <button (click)="signOut()">Log out</button>
 </div>
 

@@ -31,8 +31,13 @@ export class CreateInteractionWorkComponent implements OnInit {
     if(currentUsername){
       this.localStorUsername = currentUsername;
     }
-    this.getParagraph(currentParagraphId);
-    this.getUserWorks(this.localStorUsername);
+    // this.getParagraph(currentParagraphId);
+    // this.getUserWorks(this.localStorUsername);
+
+    Promise.all([this.getUserWorks(this.localStorUsername), this.getParagraph(currentParagraphId)])
+    .then(() => {
+      this.getUserRestriction();
+    })
   }
 
   title = 'fyp';
@@ -60,7 +65,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   userWorks:string[]=[];
   allParallelSentencesSent : string[] = [];
   allParallelSentencesId : string[] = [];
-  can_access_views = [true, true, true, true]; //true, false, true, false
+  can_access_views = [true, false, true, false]; //true, false, true, false
 
   // var for Drag and Drop input fields
   input: string = " ";
@@ -125,7 +130,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   // ------ Flask "GET" : Get user works -------------------
   getUserWorks(username: string) {
     console.log('Getting User work ids')
-    fetch((environment.apiUrl + "/api/v1/get-user-works/" + username), {
+    return fetch((environment.apiUrl + "/api/v1/get-user-works/" + username), {
         method: 'GET',
         mode: 'cors'
     }
@@ -134,7 +139,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then(data => {
       this.userWorks = data as string[];
       this.getUserWorksReady = true;
-      // console.log("user's works is" + this.userWorks);
+      console.log("user's works is" + this.userWorks);
 
       // return this.userWorks;
     });
@@ -144,7 +149,7 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   getParagraph(paragraphId: string) {
     console.log('Getting paragraph')
-    fetch((environment.apiUrl + "/api/v1/get-paragraph/" + paragraphId), {
+    return fetch((environment.apiUrl + "/api/v1/get-paragraph/" + paragraphId), {
         method: 'GET',
         mode: 'cors'
     }
@@ -162,7 +167,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.items[1].text = this.currentTitle = data.title;
       this.originalParagraphId = data._id;  
       // if (this.getUserWorksReady) {
-        this.getUserRestriction();
+        // this.getUserRestriction();
       // }
       // return this.allParallelSentencesId;
       this.renderParallel(this.allParallelSentencesSent);
@@ -170,7 +175,9 @@ export class CreateInteractionWorkComponent implements OnInit {
   }
   lastParallel:string=" ";
   otherParallelText:string[] = [];
-  parallelPlaceholderLstring = ""
+  parallelPlaceholderLstring:string=" ";
+  otherParallelTextWithBreak:string=" ";
+  otherParallelTextWithSpanBreak:string=" ";
   renderParallel(allParallelSentencesSent:any){
     if (allParallelSentencesSent.length > 1){
       this.lastParallel = allParallelSentencesSent[allParallelSentencesSent.length-1];
@@ -178,19 +185,12 @@ export class CreateInteractionWorkComponent implements OnInit {
     }
     this.otherParallelText = allParallelSentencesSent.slice(1, -1);
     console.log("otherParallelText is:" + this.otherParallelText);
-
-    // if (this.paragraph.revealed) {
-    //   this.paragraph.revealed.forEach((data: { index_interval_start: number, index_interval_end: number, revealed_score: number }) => {
-    //     this.output += '<span class=' + (data.revealed_score ? "substring--visible" : "substring--hidden") + '>' 
-    //     + text.substring(data.index_interval_start, data.index_interval_end) + '</span>'
-    //   })
-    // }
+    this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
+    this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
+    console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
+    console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
 
   }
-  // Promise.all([getUserWorks(this.localStorUsername), getParagraph(this.route.snapshot.params['id'])])
-  //   .then(() => {
-  //     getUserRestriction();
-  //   })
   
 
   generateParagraph() {
@@ -217,7 +217,8 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // corresponded to change views = ['Interaction', 'Community', 'Public', 'Owner'];
   getUserRestriction() {
-    if (this.getUserWorksReady) {
+    console.log("getUserRestriction calling")
+    // if (this.getUserWorksReady) {
       console.log("this.userWork is:" + this.userWorks);
       console.log("this.currentId is:" + this.currentId);
       console.log("this.allParallelSentencesId is:" + this.allParallelSentencesId);
@@ -233,7 +234,7 @@ export class CreateInteractionWorkComponent implements OnInit {
         this.can_access_views = [true, false, true, false];
         console.log("is public!")
       }
-    }
+    // }
   }
   
   // ------ Flask "POST" : Post paragraph -------------------

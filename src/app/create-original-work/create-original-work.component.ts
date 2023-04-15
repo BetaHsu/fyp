@@ -88,7 +88,7 @@ export class CreateOriginalWorkComponent {
       ]
   }
     this.postParagraph(paragraph);
-    this.postWorkIdToUser(this.newParagraphObjectId, this.localStorUsername);
+    // this.postWorkIdToUser(this.newParagraphObjectId, this.localStorUsername);
     this.isPublished = true;
   }
 

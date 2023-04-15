@@ -11,7 +11,13 @@ import { environment } from 'src/environments/environment';
 export class HomeComponent {
   constructor(private router: Router) {}
 
+  localStorUsername: any = undefined;
+
   ngOnInit(): void {
+    const temp = localStorage.getItem("username")
+    if(temp){
+      this.localStorUsername = temp;
+    }
     this.getAllParagraphId();
   }
 
