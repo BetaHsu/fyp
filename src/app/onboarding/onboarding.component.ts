@@ -16,6 +16,7 @@ export class OnboardingComponent {
   message: string = '';
   errorMessage : string = '';
   signInSuccess = false;
+  signUpSuccess = false;
   isErrorMessage = false;
 
   constructor(private authService: AuthService, private router: Router) { }
@@ -26,6 +27,7 @@ export class OnboardingComponent {
       //take instruciton from json result
       this.authService.signup(this.username, this.email, this.password).then(({instruction}:any) => {
         this.errorMessage = instruction;
+        this.signUpSuccess = true;
       })
     
     // Sign In
@@ -49,6 +51,9 @@ export class OnboardingComponent {
   }
   goToCreateOriginalWork() {
     this.router.navigate(['/create-original-work']);
+  }
+  goToHome() {
+    this.router.navigate(['']);
   }
 }
 

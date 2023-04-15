@@ -17,6 +17,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router) {
 
   }
+  
   // Initialize: load paragraph database & check if route from create-original-work page 
   // & get username from local storage
   ngOnInit(): void {
@@ -26,6 +27,8 @@ export class CreateInteractionWorkComponent implements OnInit {
       if (params['fromCreateOriginalWork'] === 'true') {
         this.view = 3;
       }
+      const myVar = parseInt(params['myVar']);
+      this.view = myVar;
     })
     const currentUsername = localStorage.getItem("username")
     if(currentUsername){
@@ -55,7 +58,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   currentId: string = " ";
 
   // var for drop down list to change view
-  view = 0;
+  view = 2;
   views = ['Interaction', 'Community', 'Public', 'Owner'];
   dropdownActive = false;
   isButtonSaveClicked = false;
