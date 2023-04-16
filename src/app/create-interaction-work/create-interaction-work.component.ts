@@ -18,8 +18,7 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   }
   
-  // Initialize: load paragraph database & check if route from create-original-work page 
-  // & get username from local storage
+  // Initialize: load paragraph database & check if route from create-original-work or home
   ngOnInit(): void {
     const currentParagraphId = this.route.snapshot.params['id'];
     console.log("currentParagraphId is: " + currentParagraphId);
@@ -56,6 +55,8 @@ export class CreateInteractionWorkComponent implements OnInit {
   currentRevealScoreToPublic = 0;
   allParallel: any = undefined; //entire parallel Object, not .sentence
   currentId: string = " ";
+  titleStart = -1;
+  titleEnd = -1;
 
   // var for drop down list to change view
   view = 2;
@@ -108,15 +109,19 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   newParagraphId: any = " ";
 
+  // var for reveal by user contribution & Fade Away by time Section
+  revealedObject:any = undefined;
+  index_of_hidden_reveals: any = [];
+  index_of_shown_reveals: any = [];
+  index_of_shown_reveals_exclude_title: any = [];
+
   // var for testing revealing & hidding sections of paragraph
   fullParagraph : any = undefined;
-  metadata = [
-    { index_interval_start: 0, index_interval_end: 45, revealed_score: 1 },
-    { index_interval_start: 45, index_interval_end: 80, revealed_score: 0 }
-  ];
-
+  // metadata = [
+  //   { index_interval_start: 0, index_interval_end: 45, revealed_score: 1 },
+  //   { index_interval_start: 45, index_interval_end: 80, revealed_score: 0 }
+  // ];
   interactionInstruction1 = "Create rewriting of the piece using title sentence";
-
   testAPI() {
     fetch((environment.apiUrl + "/api/test"), {
       method: 'GET',
@@ -143,7 +148,6 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.userWorks = data as string[];
       this.getUserWorksReady = true;
       console.log("user's works is" + this.userWorks);
-
       // return this.userWorks;
     });
   }
@@ -169,11 +173,10 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.generateParagraph();
       this.items[1].text = this.currentTitle = data.title;
       this.originalParagraphId = data._id;  
-      // if (this.getUserWorksReady) {
-        // this.getUserRestriction();
-      // }
-      // return this.allParallelSentencesId;
       this.renderParallel(this.allParallelSentencesSent);
+      this.revealedObject = data.revealed;
+      this.titleStart = data.title_interval_start;
+      this.titleEnd = data.title_interval_end;
     }));
   }
   lastParallel:string=" ";
@@ -195,7 +198,6 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   }
   
-
   generateParagraph() {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
@@ -264,26 +266,161 @@ export class CreateInteractionWorkComponent implements OnInit {
         }
       ],
       "revealed": [
-          {
-              "index_interval_start": this.sectionBeforeStartIndex,
-              "index_interval_end": this.sectionBeforeEndIndex,
-              "revealed_score": 0,
-          },
-          {
-              "index_interval_start": this.startIndexofSelected,
-              "index_interval_end": this.endIndexofSelected,
-              "revealed_score": 1,
-          },
-          {
-            "index_interval_start": this.sectionAfterStartIndex,
-            "index_interval_end": this.sectionAfterEndIndex,
-            "revealed_score": 0,
-          }
+        {
+          "index_interval_start": this.sectionBeforeStartIndex,
+          "index_interval_end": this.sectionBeforeEndIndex,
+          "revealed_score": 0,
+        },
+        {
+          "index_interval_start": this.startIndexofSelected,
+          "index_interval_end": this.endIndexofSelected,
+          "revealed_score": 1,
+        },
+        {
+          "index_interval_start": this.sectionAfterStartIndex,
+          "index_interval_end": this.sectionAfterEndIndex,
+          "revealed_score": 0,
+        }
       ]
     }
     this.postParagraph(paragraph);
+    // this.contributeToShow();
     
   }
+
+  contributeToShow() { // 0 => 1
+    //collect indexs of objects that has a revealed_score == 0
+    this.index_of_hidden_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
+    //chosen object index to be replaced by 3 object
+    const chosenIndex = this.index_of_hidden_reveals[Math.floor(Math.random() * this.index_of_hidden_reveals.length)];
+    console.log("chosenIndex is: " + chosenIndex);
+    const chosenStart = this.revealedObject[chosenIndex].index_interval_start;
+    console.log("chosenStart is: " + chosenStart);
+    const chosenEnd = this.revealedObject[chosenIndex].index_interval_end;
+    console.log("chosenEnd is: " + chosenEnd);
+    const range = chosenEnd - chosenStart + 1;
+    const randomValue1 = Math.floor(Math.random() * range) + chosenStart;
+    const randomValue2 = Math.floor(Math.random() * range) + chosenStart;
+
+    let smallRandom: number;
+    let bigRandom: number;
+    if (randomValue1 > randomValue2) {
+      bigRandom = randomValue1;
+      smallRandom = randomValue2;
+    } else {
+      bigRandom = randomValue2;
+      smallRandom = randomValue1;
+    }
+    console.log("smallRandom is: " + smallRandom);
+    console.log("bigRandom is: " + bigRandom);
+    let insertRevealed = [
+      {
+        "index_interval_start": chosenStart,
+        "index_interval_end": smallRandom,
+        "revealed_score": 0,
+      },
+      {
+        "index_interval_start": smallRandom,
+        "index_interval_end": bigRandom,
+        "revealed_score": 1,
+      },
+      {
+        "index_interval_start": bigRandom,
+        "index_interval_end": chosenEnd,
+        "revealed_score": 0,
+      }
+    ]
+    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed);
+  }
+
+  
+
+  PassTimeToHide() { // 1 => 0
+    //collect indexs of objects that has a revealed_score == 1
+    console.log("PassTimeToHide working.");
+    this.index_of_shown_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
+    // title sentence forever = -1
+    const indexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
+    console.log("indexOfTitle in PassTimeToHide is: " + indexOfTitle);
+    this.index_of_shown_reveals_exclude_title = this.index_of_shown_reveals.splice(indexOfTitle, 1);
+
+    //chosen object index to be replaced by 3 object
+    const chosenIndex = this.index_of_shown_reveals_exclude_title[Math.floor(Math.random() * this.index_of_shown_reveals_exclude_title.length)];
+    console.log("chosenIndex in PassTimeToHide is: " + chosenIndex);
+    const chosenStart = this.revealedObject[chosenIndex].index_interval_start;
+    console.log("chosenStart in PassTimeToHide is: " + chosenStart);
+    const chosenEnd = this.revealedObject[chosenIndex].index_interval_end;
+    console.log("chosenEnd in PassTimeToHide is: " + chosenEnd);
+    const range = chosenEnd - chosenStart + 1;
+    const randomValue1 = Math.floor(Math.random() * range) + chosenStart;
+    const randomValue2 = Math.floor(Math.random() * range) + chosenStart;
+
+    let smallRandom: number;
+    let bigRandom: number;
+    if (randomValue1 > randomValue2) {
+      bigRandom = randomValue1;
+      smallRandom = randomValue2;
+    } else {
+      bigRandom = randomValue2;
+      smallRandom = randomValue1;
+    }
+    console.log("smallRandom is: " + smallRandom);
+    console.log("bigRandom is: " + bigRandom);
+    let insertRevealed = [
+      {
+        "index_interval_start": chosenStart,
+        "index_interval_end": smallRandom,
+        "revealed_score": 1,
+      },
+      {
+        "index_interval_start": smallRandom,
+        "index_interval_end": bigRandom,
+        "revealed_score": 0,
+      },
+      {
+        "index_interval_start": bigRandom,
+        "index_interval_end": chosenEnd,
+        "revealed_score": 1,
+      }
+    ]
+    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed);
+  }
+
+  postRevealedToHidden(originalParagraphId:any, chosenIndex: any, insertRevealed: any){
+    console.log('Posting new Revealed to hidden.')
+    const data = {
+      originalParagraphId: originalParagraphId,
+      chosenIndex: chosenIndex,
+      insertRevealed: insertRevealed
+    };
+    fetch((environment.apiUrl + "/api/v1/post-revealed-to-hidden"), {
+      method: 'POST',
+      mode: 'cors',
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: JSON.stringify(data)
+    })
+    .then((response) => console.log(response))
+  }
+
+  // postRevealedToHShown(originalParagraphId:any, chosenIndex: any, insertRevealed: any){
+  //   console.log('Posting new Revealed to hidden.')
+  //   const data = {
+  //     originalParagraphId: originalParagraphId,
+  //     chosenIndex: chosenIndex,
+  //     insertRevealed: insertRevealed
+  //   };
+  //   fetch((environment.apiUrl + "/api/v1/post-revealed-to-hidden"), {
+  //     method: 'POST',
+  //     mode: 'cors',
+  //     // headers: {
+  //     //   "Content-Type": "application/json",
+  //     // },
+  //     body: JSON.stringify(data)
+  //   })
+  //   .then((response) => console.log(response))
+  // }
 
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
@@ -294,15 +431,14 @@ export class CreateInteractionWorkComponent implements OnInit {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(paragraph)
-  }
-  )
-  .then((response) => response.json())
-  .then((data => {
-    this.newParagraphId = data._id;
-    this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel);
-    this.postWorkIdToUser(this.newParagraphId, this.localStorUsername);
-  }
-  ))
+    })
+    .then((response) => response.json())
+    .then((data => {
+      this.newParagraphId = data._id;
+      this.postSentenceToParallel(this.originalParagraphId, this.newParagraphId, this.nextSentenceForParallel);
+      this.postWorkIdToUser(this.newParagraphId, this.localStorUsername);
+    }
+    ))
   }
 
   // ------ Flask "POST" : Post sentence to parallel -------------------
@@ -321,9 +457,8 @@ export class CreateInteractionWorkComponent implements OnInit {
       //   "Content-Type": "application/json",
       // },
       body: JSON.stringify(data)
-    }
-  )
-  .then((response) => console.log(response))
+    })
+    .then((response) => console.log(response))
   }
 
    // ------ Flask "POST" : Post work _id to user database -------------------
@@ -426,6 +561,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.sectionBeforeStartIndex = 0;
     this.sectionBeforeEndIndex = this.startIndexofSelected;
     this.sectionBefore = this.inputTextResortedWithBreak.slice(this.sectionBeforeStartIndex, this.sectionBeforeEndIndex + 1);
+    
     this.sectionAfterStartIndex = this.endIndexofSelected;
     this.sectionAfterEndIndex = this.inputTextResortedWithBreak.length;
     this.sectionAfter = this.inputTextResortedWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);

@@ -93,7 +93,7 @@ width: 8%;" (click)="goToHome()"/>
             <!-- "Publish" button -->
             <!-- shown when "Save" is clicked & disabled when no line selected -->
             <div class="justify-content--flex-end display--flex margin-top--24">
-                <button  *ngIf="isButtonSaveClicked" (click)="publishNewParagraph();changetoPublishView()" 
+                <button  *ngIf="isButtonSaveClicked" (click)="publishNewParagraph();changetoPublishView();contributeToShow()" 
                 [disabled]="!lineSelected">Publish</button>
             </div>
         </div>
@@ -104,6 +104,8 @@ width: 8%;" (click)="goToHome()"/>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
             <p [innerHTML]="otherParallelTextWithSpanBreak"></p>
             <p>{{ lastParallel }}</p>
+            <button (click)="contributeToShow()">contribute to show</button>
+            <button (click)="PassTimeToHide()">pass time to hide</button>
         </div>
     </div>
 </div>
