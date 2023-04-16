@@ -17,9 +17,17 @@ export class CreateInteractionWorkComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router) {
 
   }
-  
+
+  isLoggedIn = true;
+
   // Initialize: load paragraph database & check if route from create-original-work or home
   ngOnInit(): void {
+    const username = localStorage.getItem("username");
+    const userid = localStorage.getItem("userid");
+    
+    if (!username || !userid) {
+      this.isLoggedIn = false;
+    }
     const currentParagraphId = this.route.snapshot.params['id'];
     console.log("currentParagraphId is: " + currentParagraphId);
     this.route.queryParams.subscribe(params => {
@@ -342,11 +350,13 @@ export class CreateInteractionWorkComponent implements OnInit {
     // title sentence forever = -1
     const indexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
     console.log("indexOfTitle in PassTimeToHide is: " + indexOfTitle);
-    this.index_of_shown_reveals_exclude_title = this.index_of_shown_reveals.splice(indexOfTitle, 1);
-
+    console.log("index_of_shown_reveals length is: " + this.index_of_shown_reveals.length);
+    this.index_of_shown_reveals_exclude_title = this.index_of_shown_reveals.filter((element) => element !== indexOfTitle);
+    console.log("index_of_shown_reveals_exclude_title length is: " + this.index_of_shown_reveals_exclude_title.length);
     //chosen object index to be replaced by 3 object
     const chosenIndex = this.index_of_shown_reveals_exclude_title[Math.floor(Math.random() * this.index_of_shown_reveals_exclude_title.length)];
     console.log("chosenIndex in PassTimeToHide is: " + chosenIndex);
+    if(!chosenIndex) return;
     const chosenStart = this.revealedObject[chosenIndex].index_interval_start;
     console.log("chosenStart in PassTimeToHide is: " + chosenStart);
     const chosenEnd = this.revealedObject[chosenIndex].index_interval_end;
@@ -579,6 +589,10 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   goToHome() { // go to home instead
     this.router.navigate(['']);
+  }
+
+  goToOnboarding(){
+    this.router.navigate(['/onboarding']);
   }
 }
 

@@ -11,6 +11,9 @@ width: 8%;"/>
     </span>
     <p>{{ localStorUsername }}</p>
     <button (click)="signOut()">Log out</button>
+    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
+        sign in here
+    </button>
 </div>
 
 <h2 style="text-align:center">Create Original Work</h2>

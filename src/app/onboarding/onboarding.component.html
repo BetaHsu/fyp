@@ -1,5 +1,6 @@
 <!-- top-nav-bar ------------------ -->
-<img src="src/assets/image/Re-collect logo.png" alt="Logo" />
+<img src="assets/image/Re-collect logo.png" alt="Logo" style="
+width: 8%;" />
 <div class="display--flex justify-content--flex-end">
     <!-- <span class="material-symbols-outlined">
         search
@@ -7,6 +8,7 @@
     <span class="material-symbols-outlined">
         person
     </span> -->
+    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
 </div>
 <div class="auth-container">
     <h2>{{ isSigningUp ? 'Sign Up' : 'Sign In'}}</h2>

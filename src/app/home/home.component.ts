@@ -13,16 +13,32 @@ export class HomeComponent {
 
   localStorUsername: any = undefined;
 
+  isLoggedIn = true;
   ngOnInit(): void {
-    const temp = localStorage.getItem("username")
-    if(temp){
-      this.localStorUsername = temp;
+    const username = localStorage.getItem("username");
+    const userid = localStorage.getItem("userid");
+    
+    if (!username || !userid) {
+      this.isLoggedIn = false;
+      //redirect to onboarding when not logged in?
+      // this.router.navigate(['/onboarding']);
     }
 
-    Promise.all([this.getAllParagraphId(), this.getUserWorks(this.localStorUsername)])
+    if(username){
+      this.localStorUsername = username;
+    }
+
+    Promise.all([
+      this.getAllParagraphId(), 
+      this.isLoggedIn ? this.getUserWorks(this.localStorUsername) : Promise.resolve()
+    ])
     .then(() => {
-      this.getUserRestriction();
+      if(this.isLoggedIn) {
+        this.getUserRestriction();
+      }
     })
+
+    console.log("isWho is:" + this.isWho)
   }
 
   paragraphId1:string = '64213a30f469dbb6b971a5fd';
@@ -104,7 +120,7 @@ export class HomeComponent {
   }
 
   viewParagraph(paragraphId: string){
-    this.router.navigate(['/create-interaction-work', paragraphId]);
+    this.router.navigate(['/create-interaction-work', paragraphId], {queryParams: {myVar: 2}});
   }
 
   signOut() {
@@ -121,5 +137,8 @@ export class HomeComponent {
   }
   onClickInteraction(paragraphId: string) {
     this.router.navigate(['/create-interaction-work', paragraphId], {queryParams: {myVar: 0}});
+  }
+  goToOnboarding(){
+    this.router.navigate(['/onboarding']);
   }
 }

@@ -21,6 +21,18 @@ export class OnboardingComponent {
 
   constructor(private authService: AuthService, private router: Router) { }
 
+  isLoggedIn = true;
+  ngOnInit(): void {
+    const username = localStorage.getItem("username");
+    const userid = localStorage.getItem("userid");
+    
+    if (!username || !userid) {
+      this.isLoggedIn = false;
+      //redirect to onboarding when not logged in?
+      // this.router.navigate(['/onboarding']);
+    }
+  }
+
   onSubmit(): void {
     // Sign Up
     if (this.isSigningUp) {
@@ -54,6 +66,11 @@ export class OnboardingComponent {
   }
   goToHome() {
     this.router.navigate(['']);
+  }
+  signOut() {
+    localStorage.removeItem("userid");
+    localStorage.removeItem("username");
+    this.router.navigate(['/onboarding']);
   }
 }
 

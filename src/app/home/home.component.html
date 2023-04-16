@@ -9,7 +9,10 @@ width: 8%;"/>
         person
     </span>
     <p>{{ localStorUsername }}</p>
-    <button (click)="signOut()">Log out</button>
+    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
+    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
+        sign in here
+    </button>
 </div>
 
 <h2 style="text-align:center">Public Gallery Page</h2>
@@ -20,11 +23,12 @@ width: 8%;"/>
     <div class="card-body">
       <h5 class="card-title">{{ item }}</h5>
       <!-- <button class="btn btn-primary">{{ canAccessView[i] }} view</button> -->
-
-      <button *ngIf="isWho[i][0]" (click)="onClickOwner(idArray[i])" class="btn btn-primary">Owner view</button>
-      <button *ngIf="isWho[i][1]" (click)="onClickCommunity(idArray[i])" class="btn btn-primary">Community view</button>
-      <button *ngIf="isWho[i][2]" (click)="onClickInteraction(idArray[i])" class="btn btn-primary">Interaction view</button>
-
-      <button *ngIf="canAccessView[i]" (click)="viewParagraph(idArray[i])" class="btn btn-primary">Public View</button>
+      <div *ngIf="isWho[i]">
+        <button *ngIf="isWho[i][0]" (click)="onClickOwner(idArray[i])" class="btn btn-primary">Owner view</button>
+        <button *ngIf="isWho[i][1]" (click)="onClickCommunity(idArray[i])" class="btn btn-primary">Community view</button>
+        <button *ngIf="isWho[i][2]" (click)="onClickInteraction(idArray[i])" class="btn btn-primary">Interaction view</button>
+      </div>
+      <button (click)="viewParagraph(idArray[i])" class="btn btn-primary">Public View</button>
+      <p *ngIf="!isWho[i]" style="font-size: x-small;margin: 10px;">Sign in for other views</p>
     </div>
 </div>
