@@ -11,6 +11,9 @@ width: 8%;" (click)="goToHome()"/>
     </span>
     <p>{{ localStorUsername }}</p>
     <button (click)="signOut()">Log out</button>
+    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
+        sign in here
+    </button>
 </div>
 <!-- Drop-Down for different views----------------  -->
 <div class="display--flex justify-content--space-between">
