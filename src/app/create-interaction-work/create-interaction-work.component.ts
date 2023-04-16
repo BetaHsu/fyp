@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, NavigationExtras } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import ObjectId from 'bson-objectid';
 // import { Promise } from 'es6-promise';
@@ -48,6 +48,11 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then(() => {
       this.getUserRestriction();
     })
+
+    //fade after 24 
+    setInterval(() => {
+      this.PassTimeToHide();
+    }, 24 * 60 * 60 * 1000) // every 24 hours (24 hr * 60 min * 60 sec * 1000 millisec)
   }
 
   title = 'fyp';
@@ -77,7 +82,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   userWorks:string[]=[];
   allParallelSentencesSent : string[] = [];
   allParallelSentencesId : string[] = [];
-  can_access_views = [true, false, true, false]; //true, false, true, false
+  can_access_views = [false, false, true, false]; //true, false, true, false
 
   // var for Drag and Drop input fields
   input: string = " ";
@@ -187,17 +192,23 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.titleEnd = data.title_interval_end;
     }));
   }
-  lastParallel:string=" ";
+
+  lastParallelSent:string=" ";
+  lastParallelId:string=" ";
   otherParallelText:string[] = [];
+  otherParallelTextId:string[] = [];
   parallelPlaceholderLstring:string=" ";
   otherParallelTextWithBreak:string=" ";
   otherParallelTextWithSpanBreak:string=" ";
+
   renderParallel(allParallelSentencesSent:any){
     if (allParallelSentencesSent.length > 1){
-      this.lastParallel = allParallelSentencesSent[allParallelSentencesSent.length-1];
-      console.log("lastParallel is:" + this.lastParallel);
+      this.lastParallelSent = allParallelSentencesSent[allParallelSentencesSent.length-1];
+      this.lastParallelId = this.allParallelSentencesId[allParallelSentencesSent.length-1];
+      console.log("lastParallel is:" + this.lastParallelSent);
     }
-    this.otherParallelText = allParallelSentencesSent.slice(1, -1);
+    this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
+    this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and 2nd
     console.log("otherParallelText is:" + this.otherParallelText);
     this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
     this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
@@ -292,7 +303,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       ]
     }
     this.postParagraph(paragraph);
-    // this.contributeToShow();
+    // this.contributeToShow(); ! uncommand this when done testing!
     
   }
 
@@ -414,24 +425,6 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then((response) => console.log(response))
   }
 
-  // postRevealedToHShown(originalParagraphId:any, chosenIndex: any, insertRevealed: any){
-  //   console.log('Posting new Revealed to hidden.')
-  //   const data = {
-  //     originalParagraphId: originalParagraphId,
-  //     chosenIndex: chosenIndex,
-  //     insertRevealed: insertRevealed
-  //   };
-  //   fetch((environment.apiUrl + "/api/v1/post-revealed-to-hidden"), {
-  //     method: 'POST',
-  //     mode: 'cors',
-  //     // headers: {
-  //     //   "Content-Type": "application/json",
-  //     // },
-  //     body: JSON.stringify(data)
-  //   })
-  //   .then((response) => console.log(response))
-  // }
-
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
     fetch((environment.apiUrl + "/api/v1/post-paragraph"), {
@@ -491,7 +484,7 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   toggleDropdown() {// Toggle the dropdown
     this.dropdownActive = !this.dropdownActive;
-    console.log(this.dropdownActive);
+    // console.log(this.dropdownActive);
   }
   setView(newView: number) { // Close the dropdown & update view
     this.dropdownActive = false;
@@ -585,6 +578,14 @@ export class CreateInteractionWorkComponent implements OnInit {
     localStorage.removeItem("userid");
     localStorage.removeItem("username");
     this.router.navigate(['/onboarding']);
+  }
+
+  goToEachParallel(paragraphId: string) {
+    const extras: NavigationExtras = {
+      skipLocationChange: true,
+    };
+    // this.router.navigate(['/create-interaction-work', paragraphId], {queryParams: {myVar: 2}});
+    this.router.navigate(['/create-interaction-work', paragraphId], { queryParams: { myVar: 2 }, skipLocationChange: true });
   }
 
   goToHome() { // go to home instead

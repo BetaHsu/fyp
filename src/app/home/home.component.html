@@ -1,6 +1,6 @@
 <!-- top-nav-bar ------------------ -->
 <img src="assets/image/Re-collect logo.png" alt="Logo" style="
-width: 8%;"/>
+width: 8%; cursor: pointer;"/>
 <div class="display--flex justify-content--flex-end">
     <!-- <span class="material-symbols-outlined">
         search
@@ -21,14 +21,15 @@ width: 8%;"/>
 
 <div class="card" *ngFor="let item of this.titleArray; let i = index">
     <div class="card-body">
-      <h5 class="card-title">{{ item }}</h5>
-      <!-- <button class="btn btn-primary">{{ canAccessView[i] }} view</button> -->
-      <div *ngIf="isWho[i]">
-        <button *ngIf="isWho[i][0]" (click)="onClickOwner(idArray[i])" class="btn btn-primary">Owner view</button>
-        <button *ngIf="isWho[i][1]" (click)="onClickCommunity(idArray[i])" class="btn btn-primary">Community view</button>
-        <button *ngIf="isWho[i][2]" (click)="onClickInteraction(idArray[i])" class="btn btn-primary">Interaction view</button>
-      </div>
-      <button (click)="viewParagraph(idArray[i])" class="btn btn-primary">Public View</button>
-      <p *ngIf="!isWho[i]" style="font-size: x-small;margin: 10px;">Sign in for other views</p>
+        <h5 class="card-title">{{ item }}</h5>
+        <div style="display: inline-block;">
+            <div *ngIf="isWho[i]" style="display: inline-block;">
+                <button *ngIf="isWho[i][0]" (click)="onClickOwner(idArray[i])" class="btn btn-primary" style="border:none; margin: 4px;">Owner view</button>
+                <button *ngIf="isWho[i][1]" (click)="onClickCommunity(idArray[i])" class="btn btn-primary" style="border:none; margin: 4px;">Community view</button>
+                <button *ngIf="isWho[i][2]" (click)="onClickInteraction(idArray[i])" class="btn btn-primary" style="border:none; margin: 4px;">Interaction view</button>
+            </div>
+            <button (click)="viewParagraph(idArray[i])" class="btn btn-primary" style="border:none;">Public View</button>
+        </div>
+      <p *ngIf="!isWho[i]" style="font-size: x-small;margin: 10px; ">Sign in for other views</p>
     </div>
 </div>

@@ -87,6 +87,12 @@
     background-color: #a6c0f4;
     cursor: default;
   }
+  .clickable {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
 
  button[type="home"] {
     background-color: none;
@@ -95,4 +101,4 @@
     border-radius: 5px;
     padding: 10px 20px;
     cursor: pointer;
-}
+  }

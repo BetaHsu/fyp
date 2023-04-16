@@ -1,6 +1,6 @@
 <!-- top-nav-bar ------------------ -->
 <img src="assets/image/Re-collect logo.png" alt="Logo" style="
-width: 8%;" (click)="goToHome()"/>
+width: 8%; cursor: pointer;" (click)="goToHome()"/>
 <!-- <button  type="home" (click)="goToHome()"> Home</button> -->
 <div class="display--flex justify-content--flex-end">
     <!-- <span class="material-symbols-outlined">
@@ -9,8 +9,9 @@ width: 8%;" (click)="goToHome()"/>
     <span class="material-symbols-outlined">
         person
     </span>
-    <p>{{ localStorUsername }}</p>
-    <button (click)="signOut()">Log out</button>
+    <p *ngIf="isLoggedIn">{{ localStorUsername }}</p>
+    <p *ngIf="!isLoggedIn">guest</p>
+    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
     <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
         sign in here
     </button>
@@ -106,7 +107,9 @@ width: 8%;" (click)="goToHome()"/>
             <h4>Parallel collaborative work</h4>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
             <p [innerHTML]="otherParallelTextWithSpanBreak"></p>
-            <p>{{ lastParallel }}</p>
+            <!-- <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p> -->
+
+            <!-- for testing hidong and revealing -->
             <button (click)="contributeToShow()">contribute to show</button>
             <button (click)="PassTimeToHide()">pass time to hide</button>
         </div>
@@ -143,8 +146,12 @@ width: 8%;" (click)="goToHome()"/>
             <p style="color: rgb(130, 130, 130)">You have contributed to the next sentence of the parallel work. Click each sentence to access other rewritings based on the same original work.</p>
             <br>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
-            <p [innerHTML]="otherParallelTextWithBreak"></p>
-            <p>{{ lastParallel }}</p>
+            <!-- <p [innerHTML]="otherParallelTextWithBreak"></p> -->
+            <div *ngFor="let line of otherParallelText; let i = index">
+                <!-- {{ line }} -->
+                <p class="clickable" (click)="goToEachParallel(otherParallelTextId[i])">{{ line }}</p>
+            </div>
+            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
             <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p>
         </div>
     </div>
@@ -169,7 +176,13 @@ width: 8%;" (click)="goToHome()"/>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
-            <button  (click)="changetoInteractionView()" >Rewrite this work</button>
+            <button *ngIf="can_access_views[0]" (click)="changetoInteractionView()" >
+                Rewrite this work to access
+            </button>
+            <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none; display: inline-block;">
+                Sign in 
+            </button >
+            <p *ngIf="!isLoggedIn" style="display: inline-block;">to rewrite this work and access</p>
         </div>
         
         <!-- Parallel work -->
@@ -177,7 +190,7 @@ width: 8%;" (click)="goToHome()"/>
             <h4>Parallel collaborative work</h4>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
             <p [innerHTML]="otherParallelTextWithSpanBreak"></p>
-            <p>{{ lastParallel }}</p>
+            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
         </div>
     </div>
 </div>
@@ -210,7 +223,10 @@ width: 8%;" (click)="goToHome()"/>
             <br>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
             <p [innerHTML]="otherParallelTextWithBreak"></p>
-            <p>{{ lastParallel }}</p>
+            <div *ngFor="let line of otherParallelText; let i = index" (click)="goToEachParallel(otherParallelTextId[i])">
+                {{ line }}
+            </div>
+            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
             <p *ngIf="selectedLineIndex !== undefined">{{ inputTextResorted[selectedLineIndex] }}</p>
         </div>
     </div>
