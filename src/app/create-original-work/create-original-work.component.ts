@@ -18,13 +18,13 @@ export class CreateOriginalWorkComponent {
 
   }
   localStorUsername: any = undefined;
-  isLoggedIn = true;
+  isLoggedIn = false;
   ngOnInit(): void {
     const username = localStorage.getItem("username");
     const userid = localStorage.getItem("userid");
     
-    if (!username || !userid) {
-      this.isLoggedIn = false;
+    if (username || userid) {
+      this.isLoggedIn = true;
       //redirect to onboarding when not logged in?
       // this.router.navigate(['/onboarding']);
     }

@@ -33,8 +33,10 @@ export class AuthService {
       const json = await response.json(); // wait until the Promise:response.json() is done, put into var json
       if (response.ok) { //200-299 (successful)
         json.instruction = "Successfully signed up";
+        json.signUpSuccess = true;
+        console.log("neither unsername_message nor email_message exist"); // V
       } else {
-        json.instruction = "Failed to sign up"
+        json.instruction = json.message;
       }
       return json; //convert response body, JSON-formatted string, to JavaScript object
     })

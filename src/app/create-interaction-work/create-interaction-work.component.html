@@ -3,18 +3,25 @@
 width: 8%; cursor: pointer;" (click)="goToHome()"/>
 <!-- <button  type="home" (click)="goToHome()"> Home</button> -->
 <div class="display--flex justify-content--flex-end">
-    <!-- <span class="material-symbols-outlined">
-        search
-    </span> -->
-    <span class="material-symbols-outlined">
-        person
-    </span>
-    <p *ngIf="isLoggedIn">{{ localStorUsername }}</p>
-    <p *ngIf="!isLoggedIn">guest</p>
-    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
-    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
-        sign in here
-    </button>
+    <div class="top-nav-container">
+        <!-- <span class="material-symbols-outlined">
+            search
+        </span> -->
+        <span class="material-symbols-rounded" (click)="goToCreateOriginal()">
+            post_add
+        </span>
+        <div class="person-container">
+            <span class="material-symbols-rounded">
+                person
+            </span>
+            <p *ngIf="isLoggedIn">{{ localStorUsername }}</p>
+            <p *ngIf="!isLoggedIn">guest</p>
+        </div>
+        <button *ngIf="isLoggedIn" (click)="signOut()" type="instruction">Log out </button>
+        <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" type="instruction">
+            sign in here
+        </button>
+    </div>
 </div>
 <!-- Drop-Down for different views----------------  -->
 <div class="display--flex justify-content--space-between">
@@ -107,11 +114,12 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             <h4>Parallel collaborative work</h4>
             <p style="font-weight: bold">{{ currentTitle }}</p>  
             <p [innerHTML]="otherParallelTextWithSpanBreak"></p>
+            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
             <!-- <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p> -->
 
             <!-- for testing hidong and revealing -->
-            <button (click)="contributeToShow()">contribute to show</button>
-            <button (click)="PassTimeToHide()">pass time to hide</button>
+            <!-- <button (click)="contributeToShow()">contribute to show</button> -->
+            <!-- <button (click)="PassTimeToHide()">pass time to hide</button> -->
         </div>
     </div>
 </div>
@@ -179,7 +187,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             <button *ngIf="can_access_views[0]" (click)="changetoInteractionView()" >
                 Rewrite this work to access
             </button>
-            <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none; display: inline-block;">
+            <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" type="instruction">
                 Sign in 
             </button >
             <p *ngIf="!isLoggedIn" style="display: inline-block;">to rewrite this work and access</p>

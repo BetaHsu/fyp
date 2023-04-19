@@ -33,18 +33,9 @@ input[type="password"] {
     border-radius: 5px;
 }
   
-button[type="submit"], button[type="welcome"] {
-    background-color: #797979;
-    color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-}
-  
-  button {
+/* button {
     background-color: transparent;
     border: none;
     color: #4b4b4b;
     cursor: pointer;
-  }
+} */

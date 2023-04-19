@@ -18,17 +18,11 @@ width: 8%;"/>
 
 <h2 style="text-align:center">Create Original Work</h2>
 
-<!-- title & creator----------------  -->
-<!-- <div class="display--flex justify-content--flex-start">
-</div> -->
-<!-- <div class="w3-border">
-    <div class="w3-grey" style="height:24px;width:20%"></div>
-</div> -->
 <div class="display--flex justify-content--flex-end">
     <p>@{{ localStorUsername }}</p>
 </div>
 <div class="auth-container">
-<p style="color: rgb(130, 130, 130)">To start, submit at least one original work of yours to enable interacting with other works</p>
+<!-- <p style="color: rgb(130, 130, 130)">To start, submit at least one original work of yours to enable interacting with other works</p> -->
 <div>
     <textarea class="textarea-create-original" [(ngModel)]="inputText" *ngIf="!isButtonSaveClicked" 
     id="originalParagraph" rows="20" 
@@ -47,12 +41,6 @@ width: 8%;"/>
             {{ line }}
         </div>
     </div>
-
-    <!-- <div *ngIf="isButtonSaveClicked">
-        <div *ngFor="let line of inputText.split('\n')" (click)="selectedLine = line;">
-            {{line}}
-        </div>
-    </div> -->
 </div>
 
 <!-- "Save" button -->

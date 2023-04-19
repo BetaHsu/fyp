@@ -13,7 +13,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
 <div class="auth-container">
     <h2>{{ isSigningUp ? 'Sign Up' : 'Sign In'}}</h2>
     <form (submit)="onSubmit()">
-        <div class="form-group">
+        <div *ngIf="isSigningUp" class="form-group">
             <!-- *ngIf="isSigningUp" -->
             <label for="username">Username</label>
             <input type="username" id="username" name="username" [(ngModel)]="username" required>
@@ -26,15 +26,18 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             <label for="password">Password</label>
             <input type="password" id="password" name="password" [(ngModel)]="password" required>
         </div>
-        <button type="submit">{{isSigningUp ? 'Sign Up' : 'Sign In'}}</button>
+        <!-- Sign UP & Sign In button -->
+        <button  *ngIf="isSigningUp" [disabled]="!username || !email || !password " >{{isSigningUp ? 'Sign Up' : 'Sign In'}}</button>
+        <button  *ngIf="!isSigningUp" [disabled]="!email || !password" >{{isSigningUp ? 'Sign Up' : 'Sign In'}}</button>
     </form>
+
     <div *ngIf="message" class="message">{{ message }}</div>
-    <button (click)="toggleSignIn()">
+    <button type="instruction" (click)="toggleSignIn()">
         {{ isSigningUp ? 'Already have an account? Sign in' : 'New to "Re-collect" ? Sign up' }}
     </button>
     <p>{{ errorMessage }}</p>
     <p *ngIf="signInSuccess">Sign In Successful!</p>
-    <button  type="welcome" *ngIf="signUpSuccess" (click)="goToCreateOriginalWork()"> Enter Re-collect</button>
-    <button  type="welcome" *ngIf="signInSuccess" (click)="goToHome()"> Enter Re-collect</button>
+    <button  *ngIf="signUpSuccess && this.signInAfterSignUp" (click)="toggleSignIn(); temporarilyHideItself()"> Sign In to Re-collect</button>
+    <button  *ngIf="signInSuccess" (click)="goToHome()"> Enter Re-collect</button>
 </div>
 

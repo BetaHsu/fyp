@@ -23,11 +23,43 @@ textarea {
     padding: 12px 12px;
 }
 
+.top-nav-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+  
+.person-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* BUTTON */
+
 button {
-    border: 1px solid black;
-    padding: 8px 12px;
-    background-color: white;
+    background-color: #7c7c7c;
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    border: transparent;
+    border-radius: 5px;
     cursor: pointer;
+}
+
+button:disabled {
+    background-color: #c1c1c1;
+    color: #ffffff;
+    cursor: not-allowed;
+}
+
+button[type="instruction"] {
+    background-color: transparent;
+    color: #292929;
+    /* cursor: not-allowed; */
 }
 
 /* MARGINS */
@@ -52,13 +84,15 @@ button {
     justify-content: space-between;
 }
 
-/* ELEMENT */
+/* DROP-DWON */
 .dropdown {
     position: relative;
+    
 }
 
 .dropdown__selection {
     border: 1px solid black;
+    border-radius: 3px;
     cursor: pointer;
     padding: 12px;
     display: flex;
@@ -67,6 +101,7 @@ button {
 
 .dropdown__options {
     border: 1px solid black;
+    border-radius: 3px;
     list-style: none;
     padding: 6px;
     position: absolute;
@@ -88,11 +123,20 @@ button {
     cursor: not-allowed;
 }
 
+/* MATERIAL- SYMBOLS */
 .material-symbols-outlined {
   font-variation-settings:
   'FILL' 0,
   'wght' 400,
   'GRAD' 0,
+  'opsz' 48
+}
+
+.material-symbols-rounded {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 500,
+  'GRAD' 200,
   'opsz' 48
 }
 

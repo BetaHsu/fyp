@@ -5,19 +5,20 @@ width: 8%; cursor: pointer;"/>
     <!-- <span class="material-symbols-outlined">
         search
     </span> -->
-    <span class="material-symbols-outlined">
+    <span class="material-symbols-rounded" (click)="goToCreateOriginal()">
+        post_add
+    </span>
+    <span class="material-symbols-rounded">
         person
     </span>
     <p>{{ localStorUsername }}</p>
     <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
-    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
+    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" type="instruction">
         sign in here
     </button>
 </div>
 
 <h2 style="text-align:center">Public Gallery Page</h2>
-
-
 
 <div class="card" *ngFor="let item of this.titleArray; let i = index">
     <div class="card-body">

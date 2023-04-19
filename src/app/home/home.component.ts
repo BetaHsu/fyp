@@ -141,4 +141,7 @@ export class HomeComponent {
   goToOnboarding(){
     this.router.navigate(['/onboarding']);
   }
+  goToCreateOriginal(){
+    this.router.navigate(['/create-original-work']);
+  }
 }

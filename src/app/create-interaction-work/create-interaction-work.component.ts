@@ -595,5 +595,9 @@ export class CreateInteractionWorkComponent implements OnInit {
   goToOnboarding(){
     this.router.navigate(['/onboarding']);
   }
+
+  goToCreateOriginal(){
+    this.router.navigate(['/create-original-work']);
+  }
 }
 

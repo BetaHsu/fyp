@@ -18,6 +18,8 @@ export class OnboardingComponent {
   signInSuccess = false;
   signUpSuccess = false;
   isErrorMessage = false;
+  signInAfterSignUp = false;
+  justSignedUp = false;
 
   constructor(private authService: AuthService, private router: Router) { }
 
@@ -37,19 +39,23 @@ export class OnboardingComponent {
     // Sign Up
     if (this.isSigningUp) {
       //take instruciton from json result
-      this.authService.signup(this.username, this.email, this.password).then(({instruction}:any) => {
-        this.errorMessage = instruction;
-        this.signUpSuccess = true;
+      this.authService.signup(this.username, this.email, this.password).then((status: {signUpSuccess: boolean; instruction:string}) => {
+        if (status.signUpSuccess) {
+          this.signUpSuccess = true;
+          this.signInAfterSignUp = true;
+          this.justSignedUp = true;
+        }
+        this.errorMessage = status.instruction;
       })
     
     // Sign In
     } else {
-      this.authService.signin(this.username, this.email, this.password).then((user: { userid: string; instruction:string }) => {
+      this.authService.signin(this.username, this.email, this.password).then((user: { userid: string; username: string; instruction:string }) => {
         //take iuserid & nstruciton from json result
         if (user.userid) { // if successful
           //so userid can be accessed/used across application in different components and services
           localStorage.setItem("userid", user.userid)
-          localStorage.setItem("username", this.username) 
+          localStorage.setItem("username", user.username) 
           this.signInSuccess = true;
         } else {
           this.isErrorMessage = true;
@@ -57,6 +63,8 @@ export class OnboardingComponent {
         this.errorMessage = user.instruction;
       })
     }
+
+    console.log("button is clicked!")
   }
   toggleSignIn(): void {
     this.isSigningUp = !this.isSigningUp;
@@ -71,6 +79,9 @@ export class OnboardingComponent {
     localStorage.removeItem("userid");
     localStorage.removeItem("username");
     this.router.navigate(['/onboarding']);
+  }
+  temporarilyHideItself() {
+    this.signInAfterSignUp = false
   }
 }
 
