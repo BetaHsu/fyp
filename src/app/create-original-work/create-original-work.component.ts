@@ -67,10 +67,10 @@ export class CreateOriginalWorkComponent {
       "title_interval_start": this.startIndexofSelected,
       "title_interval_end": this.endIndexofSelected,
       "paragraph": this.inputTextinArrayWithBreak,
-      // "_id": this.newParagraphObjectId,
       "id": Date.now().toString(),
       "creator_id": localStorage.getItem('userid'),
       "creator_username": this.localStorUsername,
+      "reveal_score": 0,
       "parallel_sentences": [
         {
           // "id": this.newParagraphObjectId,
@@ -78,23 +78,23 @@ export class CreateOriginalWorkComponent {
         }
       ],
       "revealed": [
-          {
-              "index_interval_start": this.sectionBeforeStartIndex,
-              "index_interval_end": this.sectionBeforeEndIndex,
-              "revealed_score": 0,
-          },
-          {
-              "index_interval_start": this.startIndexofSelected,
-              "index_interval_end": this.endIndexofSelected,
-              "revealed_score": 1,
-          },
-          {
-            "index_interval_start": this.sectionAfterStartIndex,
-            "index_interval_end": this.sectionAfterEndIndex,
-            "revealed_score": 0,
-          }
+        {
+          "index_interval_start": this.sectionBeforeStartIndex,
+          "index_interval_end": this.sectionBeforeEndIndex,
+          "revealed_score": 0,
+        },
+        {
+          "index_interval_start": this.startIndexofSelected,
+          "index_interval_end": this.endIndexofSelected,
+          "revealed_score": 1,
+        },
+        {
+          "index_interval_start": this.sectionAfterStartIndex,
+          "index_interval_end": this.sectionAfterEndIndex,
+          "revealed_score": 0,
+        }
       ]
-  }
+    }
     this.postParagraph(paragraph);
     // this.postWorkIdToUser(this.newParagraphObjectId, this.localStorUsername);
     this.isPublished = true;

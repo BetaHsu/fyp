@@ -65,7 +65,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   paragraph: any = undefined; //entire paragraph database
   currentTitle: string = " "; //current paragraph title
   originalCreator: any = undefined;
-  currentRevealScoreToPublic = 0;
+  currentRevealScoreToPublic: number = 0;
   allParallel: any = undefined; //entire parallel Object, not .sentence
   currentId: string = " ";
   titleStart = -1;
@@ -190,7 +190,47 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.revealedObject = data.revealed;
       this.titleStart = data.title_interval_start;
       this.titleEnd = data.title_interval_end;
+      this.indexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
+      this.currentRevealScoreToPublic = data.reveal_score_to_public;
+
+      //collect indexs of objects that has a revealed_score == 0
+      this.index_of_hidden_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
+      //collect indexs of objects that has a revealed_score == 1
+      this.index_of_shown_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
+      console.log("index_of_shown_reveals length is: " + this.index_of_shown_reveals.length);
+      // title sentence excluded
+      this.index_of_shown_reveals_exclude_title = this.index_of_shown_reveals.filter((element) => element !== this.indexOfTitle);
+      console.log("index_of_shown_reveals_exclude_title length is: " + this.index_of_shown_reveals_exclude_title.length);
     }));
+  }
+
+  indexOfTitle = -1;
+
+  calRevealScoreToPublic(revealedObject:any, indexOfTitle:any) {
+    // calculate totalCount & titleCount
+    let totalCounts = revealedObject[revealedObject.length-1].index_interval_end;
+    let titleCounts = revealedObject[indexOfTitle].index_interval_end - revealedObject[indexOfTitle].index_interval_start;
+    console.log("titleCounts is: " + titleCounts);
+
+    //collect indexs of objects that has a revealed_score == 0
+    // let index_of_hidden_reveals = revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
+    //collect indexs of objects that has a revealed_score == 1
+    let index_of_shown_reveals = revealedObject.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
+
+    let index_of_shown_reveals_exclude_title = index_of_shown_reveals.filter((element) => element !== indexOfTitle);
+    let revealedCounts = 0 ;
+    index_of_shown_reveals_exclude_title.forEach(index => {
+      const obj = revealedObject[index];
+      const counts = obj.index_interval_end - obj.index_interval_start;
+      revealedCounts += counts;
+    })
+    console.log("revealedCharacters is: " + revealedCounts);
+    let percentage = ((revealedCounts-titleCounts)/(totalCounts-titleCounts))*100;
+    console.log("typeof temp is: " + typeof percentage)
+    console.log("percentage is: " + percentage)
+    let currentRevealScoreToPublic= +percentage.toFixed(1);
+    console.log("currentRevealScoreToPublic is: " + currentRevealScoreToPublic);
+    return currentRevealScoreToPublic;
   }
 
   lastParallelSent:string=" ";
@@ -205,16 +245,15 @@ export class CreateInteractionWorkComponent implements OnInit {
     if (allParallelSentencesSent.length > 1){
       this.lastParallelSent = allParallelSentencesSent[allParallelSentencesSent.length-1];
       this.lastParallelId = this.allParallelSentencesId[allParallelSentencesSent.length-1];
-      console.log("lastParallel is:" + this.lastParallelSent);
+      // console.log("lastParallel is:" + this.lastParallelSent);
     }
     this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
     this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and 2nd
-    console.log("otherParallelText is:" + this.otherParallelText);
+    // console.log("otherParallelText is:" + this.otherParallelText);
     this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
     this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
-    console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
-    console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
-
+    // console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
+    // console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
   }
   
   generateParagraph() {
@@ -231,9 +270,9 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.entireParagraphWithBreak = text;
     this.entireParagraphWithoutBreak = text.replace(/<br>/g, '')
     this.entireParagraphWithSpanBreak = this.output;
-    this.currentRevealScoreToPublic = this.paragraph.reveal_score_to_public;
     this.originalCreator = this.paragraph.creator_username;
-    console.log("entireParagraphWithoutBreak is: " + this.entireParagraphWithoutBreak);
+    console.log("type of currentRevealScoreToPublic is: " + typeof this.currentRevealScoreToPublic)
+    // console.log("entireParagraphWithoutBreak is: " + this.entireParagraphWithoutBreak);
     console.log("entireParagraphWithSpanBreak is: " + this.entireParagraphWithSpanBreak);
     // this.entireParagraphWithBreak = text.replace(/([.,;?!])(\s|$)/g, '$1<br>');
     // this.entireParagraphWithSpanBreak = this.output.replace(/([.,;?!])(\s|$)/g, '$1<br>');
@@ -260,56 +299,8 @@ export class CreateInteractionWorkComponent implements OnInit {
       }
     // }
   }
-  
-  // ------ Flask "POST" : Post paragraph -------------------
-  publishNewParagraph() {
-    console.log("Publish new paragraph.");
-    // console.log(this.inputTextResorted);
-    // const { ObjectId } = require('bson');
-    // const objectId = new ObjectId();
-    // this.newParagraphId = objectId;
-    let paragraph = {
-      "title": this.nextSentenceForParallel,
-      "title_interval_start": this.startIndexofSelected,
-      "title_interval_end": this.endIndexofSelected,
-      "paragraph": this.inputTextResorted.join('<br>'),
-      // "_id": this.newParagraphId,
-      "id": Date.now().toString(),
-      "creator_id": localStorage.getItem('userid'),
-      "creator_username": this.localStorUsername,
-      "reveal_score_to_public": 0,
-      "parallel_sentences": [
-        {
-          // "id": " ",
-          "sentence": this.nextSentenceForParallel,
-        }
-      ],
-      "revealed": [
-        {
-          "index_interval_start": this.sectionBeforeStartIndex,
-          "index_interval_end": this.sectionBeforeEndIndex,
-          "revealed_score": 0,
-        },
-        {
-          "index_interval_start": this.startIndexofSelected,
-          "index_interval_end": this.endIndexofSelected,
-          "revealed_score": 1,
-        },
-        {
-          "index_interval_start": this.sectionAfterStartIndex,
-          "index_interval_end": this.sectionAfterEndIndex,
-          "revealed_score": 0,
-        }
-      ]
-    }
-    this.postParagraph(paragraph);
-    // this.contributeToShow(); ! uncommand this when done testing!
-    
-  }
 
-  contributeToShow() { // 0 => 1
-    //collect indexs of objects that has a revealed_score == 0
-    this.index_of_hidden_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
+  contributeToShow() { // 0 => (0, 1, 0)
     //chosen object index to be replaced by 3 object
     const chosenIndex = this.index_of_hidden_reveals[Math.floor(Math.random() * this.index_of_hidden_reveals.length)];
     console.log("chosenIndex is: " + chosenIndex);
@@ -349,21 +340,15 @@ export class CreateInteractionWorkComponent implements OnInit {
         "revealed_score": 0,
       }
     ]
-    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed);
+    let isShowNotHide = true;
+    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
+    
   }
 
-  
-
-  PassTimeToHide() { // 1 => 0
+  PassTimeToHide() { // 1 => (1, 0, 1)
     //collect indexs of objects that has a revealed_score == 1
     console.log("PassTimeToHide working.");
-    this.index_of_shown_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
-    // title sentence forever = -1
-    const indexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
-    console.log("indexOfTitle in PassTimeToHide is: " + indexOfTitle);
-    console.log("index_of_shown_reveals length is: " + this.index_of_shown_reveals.length);
-    this.index_of_shown_reveals_exclude_title = this.index_of_shown_reveals.filter((element) => element !== indexOfTitle);
-    console.log("index_of_shown_reveals_exclude_title length is: " + this.index_of_shown_reveals_exclude_title.length);
+    console.log("index_of_shown_reveals_exclude_title.length is: " + this.index_of_shown_reveals_exclude_title.length);
     //chosen object index to be replaced by 3 object
     const chosenIndex = this.index_of_shown_reveals_exclude_title[Math.floor(Math.random() * this.index_of_shown_reveals_exclude_title.length)];
     console.log("chosenIndex in PassTimeToHide is: " + chosenIndex);
@@ -404,10 +389,17 @@ export class CreateInteractionWorkComponent implements OnInit {
         "revealed_score": 1,
       }
     ]
-    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed);
+    let isShowNotHide = false;
+    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
+    //calculate new score
+    // const newRevealedObject = ;
+    const newindexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
   }
 
-  postRevealedToHidden(originalParagraphId:any, chosenIndex: any, insertRevealed: any){
+  matchingItemExist = false;
+  newRevealedObject: any = undefined;
+
+  postRevealedToHidden(originalParagraphId:any, chosenIndex: any, insertRevealed: any, isShownotHide:boolean){
     console.log('Posting new Revealed to hidden.')
     const data = {
       originalParagraphId: originalParagraphId,
@@ -422,7 +414,76 @@ export class CreateInteractionWorkComponent implements OnInit {
       // },
       body: JSON.stringify(data)
     })
-    .then((response) => console.log(response))
+    .then((response) => response.json())
+    .then((data) => {
+      // Check if matching_item_exist is true or false
+      this.matchingItemExist = data.matching_item_exist;
+      console.log("matching Item Exist? " + this.matchingItemExist);
+      if (isShownotHide == true){
+        if (this.matchingItemExist) {
+          this.matchingItemExist = false;
+          console.log("automatically calling contributeToShow() again!!")
+          this.contributeToShow();
+        }
+      } else {
+        if (this.matchingItemExist) {
+          this.matchingItemExist = false;
+          console.log("automatically calling PassTimeToHide() again!!")
+          this.PassTimeToHide();
+        }
+      }
+      // Get entire revealed object back as response
+      // this.newRevealedObject = data.new_revealed_object;
+      // Calculate new reveal_score_to_public and post to database reveal_score_to_public
+
+      // this.calRevealScoreToPublic(newRevealedObject, );
+    })
+    .catch((error) => console.error(error));
+  }
+
+
+
+  // ------ Flask "POST" : Post paragraph -------------------
+  publishNewParagraph() {
+    console.log("Publish new paragraph.");
+    // const { ObjectId } = require('bson');
+    // const objectId = new ObjectId();
+    // this.newParagraphId = objectId;
+    let paragraph = {
+      "title": this.nextSentenceForParallel,
+      "title_interval_start": this.startIndexofSelected,
+      "title_interval_end": this.endIndexofSelected,
+      "paragraph": this.inputTextResorted.join('<br>'),
+      "id": Date.now().toString(),
+      "creator_id": localStorage.getItem('userid'),
+      "creator_username": this.localStorUsername,
+      "reveal_score_to_public": 0,
+      "parallel_sentences": [
+        {
+          // "id": " ",
+          "sentence": this.nextSentenceForParallel,
+        }
+      ],
+      "revealed": [
+        {
+          "index_interval_start": this.sectionBeforeStartIndex,
+          "index_interval_end": this.sectionBeforeEndIndex,
+          "revealed_score": 0,
+        },
+        {
+          "index_interval_start": this.startIndexofSelected,
+          "index_interval_end": this.endIndexofSelected,
+          "revealed_score": 1,
+        },
+        {
+          "index_interval_start": this.sectionAfterStartIndex,
+          "index_interval_end": this.sectionAfterEndIndex,
+          "revealed_score": 0,
+        }
+      ]
+    }
+    this.postParagraph(paragraph);
+    // this.contributeToShow(); ! uncommand this when done testing!
   }
 
   postParagraph(paragraph: any) {
@@ -568,6 +629,8 @@ export class CreateInteractionWorkComponent implements OnInit {
     this.sectionAfterStartIndex = this.endIndexofSelected;
     this.sectionAfterEndIndex = this.inputTextResortedWithBreak.length;
     this.sectionAfter = this.inputTextResortedWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);
+
+    // calculate reveal score: (add all the 1s - title characters)/total counts
   }
 
   hideResortableList(form: HTMLFormElement) {
