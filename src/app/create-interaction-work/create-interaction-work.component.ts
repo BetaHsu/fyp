@@ -191,7 +191,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.titleStart = data.title_interval_start;
       this.titleEnd = data.title_interval_end;
       this.indexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
-      this.currentRevealScoreToPublic = data.reveal_score_to_public;
+      this.newRevealScoreToPublic = data.reveal_score_to_public;
 
       //collect indexs of objects that has a revealed_score == 0
       this.index_of_hidden_reveals = this.revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
@@ -205,12 +205,14 @@ export class CreateInteractionWorkComponent implements OnInit {
   }
 
   indexOfTitle = -1;
+  newRevealScoreToPublic = 0;
 
   calRevealScoreToPublic(revealedObject:any, indexOfTitle:any) {
     // calculate totalCount & titleCount
     let totalCounts = revealedObject[revealedObject.length-1].index_interval_end;
     let titleCounts = revealedObject[indexOfTitle].index_interval_end - revealedObject[indexOfTitle].index_interval_start;
     console.log("titleCounts is: " + titleCounts);
+    console.log("totalCounts is: " + totalCounts);
 
     //collect indexs of objects that has a revealed_score == 0
     // let index_of_hidden_reveals = revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
@@ -225,37 +227,34 @@ export class CreateInteractionWorkComponent implements OnInit {
       revealedCounts += counts;
     })
     console.log("revealedCharacters is: " + revealedCounts);
-    let percentage = ((revealedCounts-titleCounts)/(totalCounts-titleCounts))*100;
-    console.log("typeof temp is: " + typeof percentage)
-    console.log("percentage is: " + percentage)
-    let currentRevealScoreToPublic= +percentage.toFixed(1);
-    console.log("currentRevealScoreToPublic is: " + currentRevealScoreToPublic);
-    return currentRevealScoreToPublic;
+    let percentage = ((revealedCounts)/(totalCounts-titleCounts))*100;
+    // console.log("typeof temp is: " + typeof percentage)
+    // console.log("percentage is: " + percentage)
+    this.newRevealScoreToPublic= +percentage.toFixed(1);
+    console.log("newRevealScoreToPublic is: " + this.newRevealScoreToPublic);
+    // post newScore to database `reveal_score_to_public`
+    this.postNewScore(this.originalParagraphId, this.newRevealScoreToPublic);
   }
 
-  lastParallelSent:string=" ";
-  lastParallelId:string=" ";
-  otherParallelText:string[] = [];
-  otherParallelTextId:string[] = [];
-  parallelPlaceholderLstring:string=" ";
-  otherParallelTextWithBreak:string=" ";
-  otherParallelTextWithSpanBreak:string=" ";
+  // ------ Flask "POST" : Post new score -------------------
 
-  renderParallel(allParallelSentencesSent:any){
-    if (allParallelSentencesSent.length > 1){
-      this.lastParallelSent = allParallelSentencesSent[allParallelSentencesSent.length-1];
-      this.lastParallelId = this.allParallelSentencesId[allParallelSentencesSent.length-1];
-      // console.log("lastParallel is:" + this.lastParallelSent);
-    }
-    this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
-    this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and 2nd
-    // console.log("otherParallelText is:" + this.otherParallelText);
-    this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
-    this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
-    // console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
-    // console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
+  postNewScore(originalParagraphId:any, newRevealScoreToPublic:any) {
+    console.log('Posting new score.')
+    const data = {
+      originalParagraphId: originalParagraphId,
+      newRevealScoreToPublic: newRevealScoreToPublic,
+    };
+    fetch((environment.apiUrl + "/api/v1/post-new-score"), {
+      method: 'POST',
+      mode: 'cors',
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: JSON.stringify(data)
+    })
+    .then((response) => console.log(response))
   }
-  
+
   generateParagraph() {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
@@ -341,7 +340,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       }
     ]
     let isShowNotHide = true;
-    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
+    this.postRevealedToChange(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
     
   }
 
@@ -390,23 +389,17 @@ export class CreateInteractionWorkComponent implements OnInit {
       }
     ]
     let isShowNotHide = false;
-    this.postRevealedToHidden(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
-    //calculate new score
-    // const newRevealedObject = ;
-    const newindexOfTitle = this.revealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
+    this.postRevealedToChange(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
   }
 
-  matchingItemExist = false;
-  newRevealedObject: any = undefined;
-
-  postRevealedToHidden(originalParagraphId:any, chosenIndex: any, insertRevealed: any, isShownotHide:boolean){
+  postRevealedToChange(originalParagraphId:any, chosenIndex: any, insertRevealed: any, isShownotHide:boolean){
     console.log('Posting new Revealed to hidden.')
     const data = {
       originalParagraphId: originalParagraphId,
       chosenIndex: chosenIndex,
       insertRevealed: insertRevealed
     };
-    fetch((environment.apiUrl + "/api/v1/post-revealed-to-hidden"), {
+    fetch((environment.apiUrl + "/api/v1/post-revealed-to-change"), {
       method: 'POST',
       mode: 'cors',
       // headers: {
@@ -417,31 +410,26 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then((response) => response.json())
     .then((data) => {
       // Check if matching_item_exist is true or false
-      this.matchingItemExist = data.matching_item_exist;
-      console.log("matching Item Exist? " + this.matchingItemExist);
-      if (isShownotHide == true){
-        if (this.matchingItemExist) {
-          this.matchingItemExist = false;
+      let matchingItemExist = data.matching_item_exist;
+      let updatedRevealedObject = data.updated_revealed_array;
+      console.log("matching Item Exist? " + matchingItemExist);
+      console.log("updatedRevealedArray length is " + updatedRevealedObject.length);
+      if (matchingItemExist) { //redo again if matchingItemExist
+        matchingItemExist = false;
+        if (isShownotHide == true){
           console.log("automatically calling contributeToShow() again!!")
           this.contributeToShow();
-        }
-      } else {
-        if (this.matchingItemExist) {
-          this.matchingItemExist = false;
+        } else {
           console.log("automatically calling PassTimeToHide() again!!")
           this.PassTimeToHide();
         }
+      } else { // assign updatedRevealedObject & newindexOfTitle as parameters for calRevealScoreToPublic()
+        let newindexOfTitle = updatedRevealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
+        this.calRevealScoreToPublic(updatedRevealedObject, newindexOfTitle); 
       }
-      // Get entire revealed object back as response
-      // this.newRevealedObject = data.new_revealed_object;
-      // Calculate new reveal_score_to_public and post to database reveal_score_to_public
-
-      // this.calRevealScoreToPublic(newRevealedObject, );
     })
     .catch((error) => console.error(error));
   }
-
-
 
   // ------ Flask "POST" : Post paragraph -------------------
   publishNewParagraph() {
@@ -539,6 +527,31 @@ export class CreateInteractionWorkComponent implements OnInit {
     }
     )
     .then((response) => console.log(response))
+  }
+
+  // ------ Render parallel sentences & links to each work -------------------
+
+  lastParallelSent:string=" ";
+  lastParallelId:string=" ";
+  otherParallelText:string[] = [];
+  otherParallelTextId:string[] = [];
+  parallelPlaceholderLstring:string=" ";
+  otherParallelTextWithBreak:string=" ";
+  otherParallelTextWithSpanBreak:string=" ";
+
+  renderParallel(allParallelSentencesSent:any){
+    if (allParallelSentencesSent.length > 1){
+      this.lastParallelSent = allParallelSentencesSent[allParallelSentencesSent.length-1];
+      this.lastParallelId = this.allParallelSentencesId[allParallelSentencesSent.length-1];
+      // console.log("lastParallel is:" + this.lastParallelSent);
+    }
+    this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
+    this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and 2nd
+    // console.log("otherParallelText is:" + this.otherParallelText);
+    this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
+    this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
+    // console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
+    // console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
   }
 
   // ------ DropDown for different views -------------------
