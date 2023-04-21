@@ -84,6 +84,41 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
                 </div>
             </form> -->
 
+            <!-- attempt 3: for testing drag and drop -->
+            <div cdkDropList (cdkDropListDropped)="onDrop($event)">
+                <div *ngFor="let item of items" cdkDrag>
+                    <div style="display: flex; align-items: flex-start;">
+                        <div style="margin-right: 10px;">
+                            <span class="material-symbols-outlined drag-handle">
+                                drag_indicator
+                            </span>
+                        </div>
+                        <div style="width: 90%;">
+                            <!-- display each input fields in each item, show delete if not the 2nd one-->
+                            <div *ngFor="let input of item.inputs; let i = index">
+                                <div class="input_container" style="display: flex; margin: 5px 0px;">
+                                    <input [(ngModel)]="input.value" [disabled]="item.disabled" style="width: 90%; height:30px;"/>
+                                    <div *ngIf="item.id !== 'text2' && item.inputs.length > 1 && i !==0 ">
+                                        <span class="material-symbols-rounded" (click)="removeInput(item, i)" style="cursor: pointer; margin: 0px 10px;">
+                                            delete
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- add field dot line button -->
+                            <div *ngIf="item.id !== 'text2'" class="add-icon-container" (click)="addInput(item)" style="cursor: pointer;">
+                                <div class="add-icon-wrapper">
+                                    <span class="material-symbols-rounded add-icon">
+                                        add
+                                    </span>
+                                    <span class="add-icon-text">Add New Field</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Display Full rewriting work -->
             <div style="white-space: pre-line">
                 <p *ngIf="isButtonSaveClicked">Your Rewriting work:</p>
@@ -108,122 +143,6 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
                 <button  *ngIf="isButtonSaveClicked" (click)="publishNewParagraph();changetoPublishView();contributeToShow()" 
                 [disabled]="!lineSelected">Publish</button>
             </div>
-
-            <!-- 1: test out multiple input fields line -->
-            <!-- <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
-                <div *ngFor="let item of items; let i = index" cdkDrag>
-                    <div class="input-wrapper">
-                        <span class="material-symbols-outlined drag-handle">
-                            drag_indicator
-                        </span>
-                    </div>
-                    <div class="drag-textarea" [id]="'text' + i" [(ngModel)]="item.text" [name]="'item-' + i" [ngModelOptions]="{standalone: true}" [disabled]="item.disabled" >
-                        <div *ngFor="let field of inputFields; let i=index" class="input_container" style="display: flex">
-                            <input [(ngModel)]="field.value" name="input{{i}}" class="input_field" style="width: 90%; height:30px"/>
-                            <div *ngIf="inputFields.length > 1 && i !== 0" class="remove-icon-container">
-                                <span class="material-symbols-rounded" (click)="removeField(i)" style="cursor: pointer;">
-                                    delete
-                                </span>
-                            </div>
-                        </div>
-                        <div class="add-icon-container">
-                            <div class="add-icon-wrapper">
-                                <span class="material-symbols-rounded add-icon" (click)="addField()" style="cursor: pointer;">
-                                    add
-                                </span>
-                                <span class="add-icon-text">Add New Field or hit "Enter" key</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form> -->
-            <!-- attempt 3: for testing drag and drop -->
-            <div cdkDropList (cdkDropListDropped)="onDrop($event)">
-                <div *ngFor="let item of items" cdkDrag>
-                    <div style="margin: 01px 0px;">
-                        <div class="input-wrapper">
-                            <span class="material-symbols-outlined drag-handle">
-                                drag_indicator
-                            </span>
-                        </div>
-                        <!-- display each input fields in each item, show delete if not the 2nd one-->
-                        <div *ngFor="let input of item.inputs; let i = index">
-                            <div class="input_container" style="display: flex; margin: 5px 0px;">
-                                <input [(ngModel)]="input.value" [disabled]="item.disabled" class="input_field" style="width: 90%; height:30px"/>
-                                <div *ngIf="item.id !== 'text2' && item.inputs.length > 1 && i !==0 ">
-                                    <span class="material-symbols-rounded" (click)="removeInput(item, i)" style="cursor: pointer;">
-                                        delete
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- add field dot line button -->
-                        <div *ngIf="item.id !== 'text2'" class="add-icon-container">
-                            <div class="add-icon-wrapper">
-                                <span class="material-symbols-rounded add-icon" (click)="addInput(item)" style="cursor: pointer;">
-                                    add
-                                </span>
-                                <span class="add-icon-text">Add New Field or hit "Enter" key</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- 2: test out multiple input fields line -->
-            <!-- <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
-                <div *ngFor="let item of items; let i = index" cdkDrag>
-                    <div class="input-wrapper">
-                        <span class="material-symbols-outlined drag-handle">
-                            drag_indicator
-                        </span>
-                    </div> -->
-                    <!-- title item -->
-                    <!-- <div *ngIf="i === 1"> 
-                        <input class="input_field" [id]="'input' + i" [placeholder]="item.placeholder.trim()" [(ngModel)]="item.text" [ngModelOptions]="{standalone: true}"  [readonly]="item.disabled" style="width: 90%; height:50px"/>
-                        <input [type]="'hidden'" [(ngModel)]="item.placeholder"  [ngModelOptions]="{standalone: true}"/> 
-                        <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" />
-                    </div> -->
-                    <!-- none-title element -->
-                    <!-- <div *ngIf="i !== 1" class="drag-textarea" [id]="'text' + i">
-                        <div *ngFor="let field of item.inputs; let j=index" class="input_container" style="display: flex">
-                            <input [(ngModel)]="field.value" [ngModelOptions]="{standalone: true}" class="input_field" style="width: 90%; height:30px"/>
-                            <input [type]="'hidden'" [(ngModel)]="item.placeholder"  [ngModelOptions]="{standalone: true}"/> 
-                            <div *ngIf="item.inputs.length > 1 && j !== 0">
-                                <span class="material-symbols-rounded" (click)="removeField(item, j)" style="cursor: pointer;">
-                                    delete
-                                </span>
-                            </div>
-                        </div>
-                        <div class="add-icon-container">
-                            <div class="add-icon-wrapper">
-                                <span class="material-symbols-rounded add-icon" (click)="addField(item)" style="cursor: pointer;">
-                                    add
-                                </span>
-                                <span class="add-icon-text">Add New Field or hit "Enter" key</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form> -->
-
-            <!-- <div *ngFor="let field of inputFields; let i=index" class="input_container" style="display: flex">
-                <input [(ngModel)]="field.value" name="input{{i}}" class="input_field" style="width: 90%; height:30px"/>
-                <div *ngIf="inputFields.length > 1 && i !== 0" class="remove-icon-container">
-                    <span class="material-symbols-rounded" (click)="removeField(i)" style="cursor: pointer;">
-                        delete
-                    </span>
-                </div>
-            </div>
-            <div class="add-icon-container">
-                <div class="add-icon-wrapper">
-                    <span class="material-symbols-rounded add-icon" (click)="addField()" style="cursor: pointer;">
-                        add
-                    </span>
-                    <span class="add-icon-text">Add New Field or hit "Enter" key</span>
-                </div>
-            </div> -->
-            
-            <!-- <button (click)="addField()">+</button> -->
         </div>
         
         <!-- Parallel work -->

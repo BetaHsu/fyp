@@ -53,10 +53,10 @@
   }
   
   .drag-handle {
-    position: absolute;
+    /* position: absolute; */
     top: 0;
     left: 0;
-    padding: 8px;
+    padding: 6px;
   }
 
   /* Drag & Drop */
@@ -113,7 +113,7 @@
   
   .input-field {
     flex-grow: 1;
-    margin-right: 10px;
+    /* margin-right: 10px; */
     /* height: 30px; */
     /* width: 80%; */
   }

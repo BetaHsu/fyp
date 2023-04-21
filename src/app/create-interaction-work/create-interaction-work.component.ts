@@ -200,7 +200,13 @@ export class CreateInteractionWorkComponent implements OnInit {
       console.log("allParallelSentences sentence length are:" + this.allParallelSentencesSent.length);
       this.allParallel = data.parallel_sentences; // entire parallel_sentences Object, no use for now
       this.generateParagraph();
-      this.currentTitle = data.title; //this.items[1].text = 
+      // setTimeout(() => {
+      //   this.currentTitle = data.title
+      //   this.cd.detectChanges();
+      // }, 0);
+      this.currentTitle = this.items[1].inputs[0].value = data.title;
+      // this.cd.detectChanges();
+      console.log("currentTitle is update to: "+ this.currentTitle);
       this.originalParagraphId = data._id;  
       this.renderParallel(this.allParallelSentencesSent);
       this.revealedObject = data.revealed;
@@ -731,9 +737,9 @@ export class CreateInteractionWorkComponent implements OnInit {
   // ];
 
   items = [
-    { id: 'text1', rows: '6',  inputs: [{ value: 'for 1st section' },{ value: 'for 1st section' }], disabled: false, text:'sth1'  },
-    {  id: 'text2', rows: '2',  inputs: [{ value: 'this is title'}], disabled: true, text:'sth2'},
-    { id: 'text3', rows: '6',  inputs: [{ value: 'for 2nd section' },{ value: 'for 2nd section' }], disabled: false, text:'sth3'  }
+    { id: 'text1', rows: '6',  inputs: [{ value: ' ' },{ value: ' ' }], disabled: false, text:'sth1'  },
+    {  id: 'text2', rows: '2',  inputs: [{ value: this.currentTitle}], disabled: true, text:'sth2'},
+    { id: 'text3', rows: '6',  inputs: [{ value: ' ' },{ value: ' ' }], disabled: false, text:'sth3'  }
   ];
 
   inputFields = [
