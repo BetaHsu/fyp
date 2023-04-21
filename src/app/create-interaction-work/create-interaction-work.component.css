@@ -102,3 +102,45 @@
     padding: 10px 20px;
     cursor: pointer;
   }
+
+  
+  /* for input text by array of lines testing */
+  .input-container {
+    /* display: flex; */
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .input-field {
+    flex-grow: 1;
+    margin-right: 10px;
+    /* height: 30px; */
+    /* width: 80%; */
+  }
+  
+  .remove-icon-container {
+    /* display: flex; */
+    /* align-items: center; */
+    /* margin-left: 10px; */
+  }
+
+  .add-icon-container {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px 0;
+    padding: 16px;
+  }
+  
+  .add-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .add-icon-text {
+    margin-left: 8px;
+    font-size: 14px;
+  }

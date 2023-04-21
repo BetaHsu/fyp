@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Output, Input, OnInit} from '@angular/core';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import { Router } from '@angular/router';
 import { ActivatedRoute, NavigationExtras } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import ObjectId from 'bson-objectid';
+import { FormControl, FormBuilder } from '@angular/forms';
 // import { Promise } from 'es6-promise';
 
 @Component({
@@ -14,11 +15,16 @@ import ObjectId from 'bson-objectid';
   styleUrls: ['./create-interaction-work.component.css'],
 })
 export class CreateInteractionWorkComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private router: Router) {
-
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder) {
+    // this.readOnlyInput = null;
   }
 
   isLoggedIn = true;
+
+  onDrop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.items, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.inputValues, event.previousIndex, event.currentIndex);
+  }
 
   // Initialize: load paragraph database & check if route from create-original-work or home
   ngOnInit(): void {
@@ -53,7 +59,17 @@ export class CreateInteractionWorkComponent implements OnInit {
     setInterval(() => {
       this.PassTimeToHide();
     }, 24 * 60 * 60 * 1000) // every 24 hours (24 hr * 60 min * 60 sec * 1000 millisec)
+
+    // initialize inputValues array with default values
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      const inputs = item.inputs;
+      const values = inputs.map(input => input.value);
+      this.inputValues.push(values);
+    }
   }
+
+  inputValues:string[][] = [];
 
   title = 'fyp';
   user: string | undefined = undefined;
@@ -95,11 +111,11 @@ export class CreateInteractionWorkComponent implements OnInit {
   inputTextResortedWithBreak: string = " "; // resorted text w/ <br> in between each lines as one single string
   // inputTextResortedInLines : string[][] = []; //an array of arrays of strings
   disabledItemId = 'text2';
-  items = [
-    { id: 'text1', rows: '6',  placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
-    { id: 'text2', rows: '2',  text: this.currentTitle, disabled: true },
-    { id: 'text3', rows: '6',  placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
-  ];
+  // items = [
+  //   { id: 'text1', rows: '6',  type: 'text', placeholder: 'Enter 1st section of rewriting work', text: this.rewritingSection1, disabled: false  },
+  //   { id: 'text2', rows: '2',  type: 'text', text: this.currentTitle, disabled: true },
+  //   { id: 'text3', rows: '6',  type: 'text', placeholder: 'Enter 2nd section of rewriting work', text: this.rewritingSection2, disabled: false }
+  // ];
 
   // var for selcting line to publish
   selectedLineIndex = -1;
@@ -184,7 +200,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       console.log("allParallelSentences sentence length are:" + this.allParallelSentencesSent.length);
       this.allParallel = data.parallel_sentences; // entire parallel_sentences Object, no use for now
       this.generateParagraph();
-      this.items[1].text = this.currentTitle = data.title;
+      this.currentTitle = data.title; //this.items[1].text = 
       this.originalParagraphId = data._id;  
       this.renderParallel(this.allParallelSentencesSent);
       this.revealedObject = data.revealed;
@@ -576,42 +592,47 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // ------ Resortable input fields --------------------------------
 
-  drop(event: CdkDragDrop<any[]>) {
-    const draggedItem = this.items[event.previousIndex];
-    const targetItem = this.items[event.currentIndex];
-    const movedItem = this.items[event.previousIndex];
-    if (movedItem.disabled) {
-      return;
-    }
-    // Remove the dragged item from the array
-    this.items.splice(event.previousIndex, 1);
-    // Insert the dragged item at the target index
-    this.items.splice(event.currentIndex, 0, draggedItem);
+  // drop(event: CdkDragDrop<any[]>) {
+  //   const draggedItem = this.items[event.previousIndex];
+  //   const targetItem = this.items[event.currentIndex];
+  //   const movedItem = this.items[event.previousIndex];
+  //   if (movedItem.disabled) {
+  //     return;
+  //   }
+  //   // Remove the dragged item from the array
+  //   this.items.splice(event.previousIndex, 1);
+  //   // Insert the dragged item at the target index
+  //   this.items.splice(event.currentIndex, 0, draggedItem);
 
-    moveItemInArray(this.items, event.previousIndex, event.currentIndex);
+  //   moveItemInArray(this.items, event.previousIndex, event.currentIndex);
 
-    // If target item is defined, swap properties of dragged <->> target item
-    if (targetItem) {
-      // swap text value
-      const tempText = draggedItem.text;
-      draggedItem.text = targetItem.text;
-      targetItem.text = tempText;
-      // swap rows
-      const temprows = draggedItem.rows;
-      draggedItem.rows = targetItem.rows;
-      targetItem.rows = temprows;
-      // swap placeholder
-      const tempPlaceholder = draggedItem.placeholder;
-      draggedItem.placeholder = targetItem.placeholder;
-      targetItem.placeholder = tempPlaceholder;
-      // swap disabled property
-      const tempDisabled = draggedItem.disabled;
-      draggedItem.disabled = targetItem.disabled;
-      targetItem.disabled = tempDisabled;
-    }
-    this.sorted = true;
-  }
+  //   // If target item is defined, swap properties of dragged <->> target item
+  //   if (targetItem) {
+  //     // swap text value
+  //     const tempText = draggedItem.text;
+  //     draggedItem.text = targetItem.text;
+  //     targetItem.text = tempText;
+  //     // swap rows
+  //     // const temprows = draggedItem.rows;
+  //     // draggedItem.rows = targetItem.rows;
+  //     // targetItem.rows = temprows;
+  //     // swap placeholder
+  //     const tempPlaceholder = draggedItem.placeholder;
+  //     draggedItem.placeholder = targetItem.placeholder;
+  //     targetItem.placeholder = tempPlaceholder;
+  //     // swap inputs
+  //     // const tempInputs = draggedItem.inputs;
+  //     // draggedItem.inputs = targetItem.inputs;
+  //     // targetItem.inputs = tempInputs;
+  //     // swap disabled property
+  //     const tempDisabled = draggedItem.disabled;
+  //     draggedItem.disabled = targetItem.disabled;
+  //     targetItem.disabled = tempDisabled;
+  //   }
+  //   this.sorted = true;
+  // }
 
+  
   // if click button, get resorted texts, update button
   getSortedItems() {
     // iterate through items[], create inputTextResorted[] containing only text property of each object
@@ -674,6 +695,74 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   goToCreateOriginal(){
     this.router.navigate(['/create-original-work']);
+  }
+
+  // items = [
+  //   { 
+  //     id: 'text1', 
+  //     rows: '6',  
+  //     inputs: [
+  //       { value: '' },
+  //       { value: '' }
+  //     ],
+  //     placeholder: '1st section', 
+  //     text: 'this.rewritingSection1', 
+  //     disabled: false  
+  //   },
+  //   { 
+  //     id: 'text2', 
+  //     rows: '2',  
+  //     inputs: [ ],
+  //     placeholder: 'this.currentTitle', 
+  //     text: this.currentTitle, 
+  //     disabled: true 
+  //   },
+  //   { 
+  //     id: 'text3', 
+  //     rows: '6',  
+  //     inputs: [
+  //       { value: '' },
+  //       { value: '' }
+  //     ],
+  //     placeholder: '2nd section', 
+  //     text: 'this.rewritingSection2', 
+  //     disabled: false  
+  //   }
+  // ];
+
+  items = [
+    { id: 'text1', rows: '6',  inputs: [{ value: 'for 1st section' },{ value: 'for 1st section' }], disabled: false, text:'sth1'  },
+    {  id: 'text2', rows: '2',  inputs: [{ value: 'this is title'}], disabled: true, text:'sth2'},
+    { id: 'text3', rows: '6',  inputs: [{ value: 'for 2nd section' },{ value: 'for 2nd section' }], disabled: false, text:'sth3'  }
+  ];
+
+  inputFields = [
+    { value: '' },
+    { value: '' }
+  ];
+
+  addField(item:any) {
+    item.inputs.push({ value: '' });
+  }
+
+  removeField(item:any, index: number) {
+    item.inputs.splice(index, 1);
+  }
+
+  allInputFields : string[] = [];
+
+  saveInputFieldsValues() {
+    this.allInputFields = this.inputFields.map(field => field.value);
+  }
+
+  addInput(item: any) {
+    item.inputs.push({ value: '' });
+    this.inputValues[this.items.indexOf(item)].push('');
+  }
+  
+  removeInput(item: any, index: number) {
+    item.inputs.splice(index, 1);
+    this.inputValues[this.items.indexOf(item)].splice(index, 1);
   }
 }
 
