@@ -58,9 +58,9 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- if not "Save", show partially visible paragraph -->
-            <p *ngIf="isButtonSaveClicked==false" [innerHTML]="entireParagraphWithSpanBreak"></p>
+            <p *ngIf="isButtonSaveClicked==false" [innerHTML]="output"></p>
             <!-- if "Save", show fully visible paragraph -->
-            <p *ngIf="isButtonSaveClicked==true">{{ entireParagraphWithoutBreak }}</p>
+            <p *ngIf="isButtonSaveClicked==true">{{ paragraphArrayInString }}</p>
 
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
@@ -85,39 +85,42 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             </form> -->
 
             <!-- attempt 3: for testing drag and drop -->
-            <div cdkDropList (cdkDropListDropped)="onDrop($event)">
-                <div *ngFor="let item of items" cdkDrag>
-                    <div style="display: flex; align-items: flex-start;">
-                        <div style="margin-right: 10px;">
-                            <span class="material-symbols-outlined drag-handle">
-                                drag_indicator
-                            </span>
-                        </div>
-                        <div style="width: 90%;">
-                            <!-- display each input fields in each item, show delete if not the 2nd one-->
-                            <div *ngFor="let input of item.inputs; let i = index">
-                                <div class="input_container" style="display: flex; margin: 5px 0px;">
-                                    <input [(ngModel)]="input.value" [disabled]="item.disabled" style="width: 90%; height:30px;"/>
-                                    <div *ngIf="item.id !== 'text2' && item.inputs.length > 1 && i !==0 ">
-                                        <span class="material-symbols-rounded" (click)="removeInput(item, i)" style="cursor: pointer; margin: 0px 10px;">
-                                            delete
-                                        </span>
+            <div *ngIf="showList">
+                <div cdkDropList (cdkDropListDropped)="onDrop($event)">
+                    <div *ngFor="let item of items" cdkDrag>
+                        <div style="display: flex; align-items: flex-start;">
+                            <div style="margin-right: 10px;">
+                                <span class="material-symbols-outlined drag-handle">
+                                    drag_indicator
+                                </span>
+                            </div>
+                            <div style="width: 90%;">
+                                <!-- display each input fields in each item, show delete if not the 2nd one-->
+                                <div *ngFor="let input of item.inputs; let i = index">
+                                    <div class="input_container" style="display: flex; margin: 5px 0px;">
+                                        <input [(ngModel)]="input.value" [disabled]="item.disabled" style="width: 90%; height:30px;"/>
+                                        <div *ngIf="item.id !== 'text2' && item.inputs.length > 1 && i !==0 ">
+                                            <span class="material-symbols-rounded" (click)="removeInput(item, i)" style="cursor: pointer; margin: 0px 10px;">
+                                                delete
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- add field dot line button -->
-                            <div *ngIf="item.id !== 'text2'" class="add-icon-container" (click)="addInput(item)" style="cursor: pointer;">
-                                <div class="add-icon-wrapper">
-                                    <span class="material-symbols-rounded add-icon">
-                                        add
-                                    </span>
-                                    <span class="add-icon-text">Add New Field</span>
+                                <!-- add field dot line button -->
+                                <div *ngIf="item.id !== 'text2'" class="add-icon-container" (click)="addInput(item)" style="cursor: pointer;">
+                                    <div class="add-icon-wrapper">
+                                        <span class="material-symbols-rounded add-icon">
+                                            add
+                                        </span>
+                                        <span class="add-icon-text">Add New Field</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
 
             <!-- Display Full rewriting work -->
             <div style="white-space: pre-line">
@@ -125,7 +128,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
                 <!-- <p [innerHTML]="inputTextResorted.join('<br>')"></p> -->
             </div>
             <!-- selct sentence to publish -->
-            <div *ngFor="let line of inputTextResorted; let i = index" 
+            <div *ngFor="let line of resortedInputValues; let i = index" 
             [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
                 {{ line }}
             </div>
@@ -133,9 +136,8 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             <!-- shown when "Save" not clicked & disabled when no input texts -->
             <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
             <div class="justify-content--flex-end display--flex margin-top--24">
-                <button  *ngIf="!isButtonSaveClicked" (click)="getSortedItems()"  
+                <button  *ngIf="!isButtonSaveClicked" (click)="getSortedItems(); hideResortableList()"  
                 [disabled]="(items[0].text && items[2].text) ? false : true" >Save</button>
-                <!-- hideResortableList(resortableList) -->
             </div>
             <!-- "Publish" button -->
             <!-- shown when "Save" is clicked & disabled when no line selected -->
@@ -176,7 +178,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <p [innerHTML]="entireParagraphWithBreak"></p>
+            <p [innerHTML]="output"></p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
@@ -217,7 +219,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- partially visible paragraph -->
-            <p [innerHTML]="entireParagraphWithSpanBreak"></p>
+            <p [innerHTML]="output"></p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
@@ -255,7 +257,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <p [innerHTML]="entireParagraphWithBreak"></p>
+            <p [innerHTML]="paragraphArrayInString"></p>
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
