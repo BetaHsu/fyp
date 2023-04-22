@@ -185,7 +185,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then((data => {
       this.paragraph = data;
       this.paragraphArray = data.paragraphArray;
-      this.paragraphArrayInString = this.paragraphArray.join('<br>');
+      this.paragraphArrayInString = data.paragraph;
       this.revealedObject = data.revealed;
       // console.log("data.revealed is: " + data.revealed)
       this.allParallelSentencesSent = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.sentence);
@@ -197,6 +197,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.currentTitle = this.items[1].inputs[0].value = data.title;
       console.log("currentTitle is update to: "+ this.currentTitle);
       this.originalParagraphId = data._id;  
+      console.log("originalParagraphId is: "+ this.originalParagraphId);
       this.renderParallel(this.allParallelSentencesSent);
       this.indexOfTitle = data.title_index;
       this.newRevealScoreToPublic = data.reveal_score_to_public;
@@ -205,19 +206,23 @@ export class CreateInteractionWorkComponent implements OnInit {
   generateParagraph() {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
-    // console.log("revealedObject is: " + this.revealedObject);
-    // console.log("paragraphArray is: " + this.paragraphArray);
     for (let i=0; i<this.paragraphArray.length; i++) {
       let line = this.paragraphArray[i];
       let sections = this.revealedObject[i];
-      let scetionStrings:string[] = [];
+      let sectionStrings:string[] = [];
       for (let j=0; j<sections.length; j++) {
         let section = sections[j];
         let sectionText = line.substring(section.index_interval_start, section.index_interval_end);
-        let sectionClass = section.revealed_score === 1 ? 'substring--visible' : 'substring--hidden';
-        scetionStrings.push(`<span class="${sectionClass}">${sectionText}</span>`);
+        console.log("sectionText is: " + sectionText);
+        let sectionClass;
+        if (section.revealed_score == 1) {
+          sectionClass = 'substring--visible';
+        } else {
+          sectionClass = 'substring--hidden';
+        }
+        sectionStrings.push(`<span class="${sectionClass}">${sectionText}</span>`);
       }
-      this.output += scetionStrings.join('') + '<br>';
+      this.output += sectionStrings.join('') + '<br>';
     }
     console.log("output is: " + this.output);
   }
@@ -324,32 +329,66 @@ export class CreateInteractionWorkComponent implements OnInit {
   }
 
   // ----------- Flask "POST" : Post new score -------------------
-  calRevealScoreToPublic(revealedObject:any, indexOfTitle:any) {
+  calRevealScoreToPublic(revealedObject:any) {
     // calculate totalCount & titleCount
-    let totalCounts = revealedObject[revealedObject.length-1].index_interval_end;
-    let titleCounts = revealedObject[indexOfTitle].index_interval_end - revealedObject[indexOfTitle].index_interval_start;
-    console.log("titleCounts is: " + titleCounts);
+    // let totalCounts = revealedObject[revealedObject.length-1].index_interval_end;
+    // let titleCounts = revealedObject[indexOfTitle].index_interval_end - revealedObject[indexOfTitle].index_interval_start;
+    console.log("totalCounts from array is: " + this.paragraphArrayInString.length);
+    let totalCounts = 0;
+    for (let i = 0; i < revealedObject.length; i++) {
+      const lineArray = revealedObject[i];
+      for (let j = 0; j < lineArray.length; j++) {
+        const obj = lineArray[j];
+        totalCounts += obj.index_interval_end - obj.index_interval_start;
+      }
+    }
     console.log("totalCounts is: " + totalCounts);
 
+    let titleCounts = 0;
+    for (let j = 0; j < revealedObject[this.indexOfTitle].length; j++) {
+      const obj = revealedObject[this.indexOfTitle][j];
+      titleCounts += obj.index_interval_end - obj.index_interval_start;
+    }
+    console.log("titleCounts is: " + titleCounts);
+
+    let totalShow = 0;
+    for (let i = 0; i < revealedObject.length; i++) {
+      const lineArray = revealedObject[i];
+      for (let j = 0; j < lineArray.length; j++) {
+        const obj = lineArray[j];
+        if (obj.revealed_score === 1) {
+          totalShow += obj.index_interval_end - obj.index_interval_start;
+        }
+      }
+    }
+    console.log("totalShow is: " + totalShow);
+    let totalHide = 0;
+    for (let i = 0; i < revealedObject.length; i++) {
+      const lineArray = revealedObject[i];
+      for (let j = 0; j < lineArray.length; j++) {
+        const obj = lineArray[j];
+        if (obj.revealed_score === 0) {
+          totalHide += obj.index_interval_end - obj.index_interval_start;
+        }
+      }
+    }
+    console.log("totalHide is: " + totalHide);
     //collect indexs of objects that has a revealed_score == 0
     // let index_of_hidden_reveals = revealedObject.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
     //collect indexs of objects that has a revealed_score == 1
-    let index_of_shown_reveals = revealedObject.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
+    // let index_of_shown_reveals = revealedObject.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
 
-    let index_of_shown_reveals_exclude_title = index_of_shown_reveals.filter((element) => element !== indexOfTitle);
-    let revealedCounts = 0 ;
-    index_of_shown_reveals_exclude_title.forEach(index => {
-      const obj = revealedObject[index];
-      const counts = obj.index_interval_end - obj.index_interval_start;
-      revealedCounts += counts;
-    })
-    console.log("revealedCharacters is: " + revealedCounts);
-    let percentage = ((revealedCounts)/(totalCounts-titleCounts))*100;
+    // let index_of_shown_reveals_exclude_title = index_of_shown_reveals.filter((element) => element !== indexOfTitle);
+    // let revealedCounts = 0 ;
+    // index_of_shown_reveals_exclude_title.forEach(index => {
+    //   const obj = revealedObject[index];
+    //   const counts = obj.index_interval_end - obj.index_interval_start;
+    //   revealedCounts += counts;
+    // })
+    let percentage = ((totalShow-titleCounts)/(totalCounts-titleCounts))*100;
     // console.log("typeof temp is: " + typeof percentage)
-    // console.log("percentage is: " + percentage)
     this.newRevealScoreToPublic= +percentage.toFixed(1);
     console.log("newRevealScoreToPublic is: " + this.newRevealScoreToPublic);
-    // post newScore to database `reveal_score_to_public`
     this.postNewScore(this.originalParagraphId, this.newRevealScoreToPublic);
   }
   postNewScore(originalParagraphId:any, newRevealScoreToPublic:any) {
@@ -370,12 +409,12 @@ export class CreateInteractionWorkComponent implements OnInit {
   }
 
   // ------ Flask "POST" : Post new reveal object after showing or hiding -------------------
-  postRevealedToChange(originalParagraphId:any, chosenIndex: any, insertRevealed: any, isShownotHide:boolean){
+  postRevealedToChange(originalParagraphId:any, selectedLineIndex:any, lineArrayCopy:any, isShownotHide:boolean){
     console.log('Posting new Revealed to hidden.')
     const data = {
       originalParagraphId: originalParagraphId,
-      chosenIndex: chosenIndex,
-      insertRevealed: insertRevealed
+      selectedLineIndex: selectedLineIndex,
+      lineArrayCopy: lineArrayCopy
     };
     fetch((environment.apiUrl + "/api/v1/post-revealed-to-change"), {
       method: 'POST',
@@ -387,24 +426,9 @@ export class CreateInteractionWorkComponent implements OnInit {
     })
     .then((response) => response.json())
     .then((data) => {
-      // Check if matching_item_exist is true or false
-      let matchingItemExist = data.matching_item_exist;
       let updatedRevealedObject = data.updated_revealed_array;
-      console.log("matching Item Exist? " + matchingItemExist);
-      console.log("updatedRevealedArray length is " + updatedRevealedObject.length);
-      if (matchingItemExist) { //redo again if matchingItemExist
-        matchingItemExist = false;
-        if (isShownotHide == true){
-          console.log("automatically calling contributeToShow() again!!")
-          this.contributeToShow();
-        } else {
-          console.log("automatically calling PassTimeToHide() again!!")
-          this.PassTimeToHide();
-        }
-      } else { // assign updatedRevealedObject & newindexOfTitle as parameters for calRevealScoreToPublic()
-        let newindexOfTitle = updatedRevealedObject.findIndex((obj) => obj.index_interval_start === this.titleStart && obj.index_interval_end === this.titleEnd);
-        this.calRevealScoreToPublic(updatedRevealedObject, newindexOfTitle); 
-      }
+      console.log("updatedRevealedObject.length is: " + updatedRevealedObject.length)
+      this.calRevealScoreToPublic(updatedRevealedObject); 
     })
     .catch((error) => console.error(error));
   }
@@ -413,63 +437,79 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // ------------- To show -----------------
   contributeToShow() { // 0 => (0, 1, 0)
-    // keep randomly select a line until it contain at least one revealed_score = 0
-    let isValidLine = false
-    let selectedLineIndex = -1;
+    console.log("contributeToShow working.");
+    let insertRevealed;
     let selectedLineArray;
-    while(!isValidLine) {
-      const randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
-      const candidateLineArray = this.revealedObject[randomLineIndex];
-      isValidLine = candidateLineArray.some(element => element.revealed_score === 0);
-      if (isValidLine) {
-        selectedLineArray = candidateLineArray;
-        selectedLineIndex = randomLineIndex;
+    let chosenIndex;
+    let selectedLineIndex = -1;
+    while (true) {
+      let isValidLine = false
+      while(!isValidLine) {
+        // keep randomly select a line until it contain at least one revealed_score = 0
+        console.log("indexOfTitle is: " + this.indexOfTitle)
+        let randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
+        while (randomLineIndex == this.indexOfTitle) {
+          randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
+        }
+        console.log("randomLineIndex is :" + randomLineIndex);
+        const candidateLineArray = this.revealedObject[randomLineIndex];
+        isValidLine = candidateLineArray.some(element => element.revealed_score == 0);
+        if (isValidLine) {
+          selectedLineArray = candidateLineArray;
+          selectedLineIndex = randomLineIndex;
+        }
+        console.log("selectedLineIndex is :" + selectedLineIndex);
+      }
+      //collect indexs of objects that has a revealed_score == 0
+      const index_of_hidden_reveals = selectedLineArray.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
+      console.log("index_of_hidden_reveals length is :" + index_of_hidden_reveals.length);
+  
+      //chosen object index to be replaced by 3 object
+      const chosenIndex = index_of_hidden_reveals[Math.floor(Math.random() * index_of_hidden_reveals.length)];
+      console.log("chosenIndex is :" + chosenIndex);
+      const chosenObject = selectedLineArray[chosenIndex];
+      const chosenStart = selectedLineArray[chosenIndex].index_interval_start;
+      console.log("chosenStart is :" + chosenStart);
+      const chosenEnd = selectedLineArray[chosenIndex].index_interval_end;
+      console.log("chosenEnd is :" + chosenEnd);
+      const range = chosenEnd - chosenStart + 1;
+      const randomValue1 = Math.floor(Math.random() * range) + chosenStart;
+      const randomValue2 = Math.floor(Math.random() * range) + chosenStart; 
+  
+      let smallRandom: number;
+      let bigRandom: number;
+      if (randomValue1 > randomValue2) {
+        bigRandom = randomValue1;
+        smallRandom = randomValue2;
+      } else {
+        bigRandom = randomValue2;
+        smallRandom = randomValue1;
+      }
+      console.log("smallRandom is: " + smallRandom);
+      console.log("bigRandom is: " + bigRandom);
+      insertRevealed = [
+        {
+          "index_interval_start": chosenStart,
+          "index_interval_end": smallRandom,
+          "revealed_score": 0,
+        },
+        {
+          "index_interval_start": smallRandom,
+          "index_interval_end": bigRandom,
+          "revealed_score": 1,
+        },
+        {
+          "index_interval_start": bigRandom,
+          "index_interval_end": chosenEnd,
+          "revealed_score": 0,
+        }
+      ];
+      //find matches, if so break and redo whole function again
+      const matches = insertRevealed.filter(obj => obj.index_interval_start === chosenStart && obj.index_interval_end === chosenEnd);
+      if (matches.length === 0) {
+        break;
       }
     }
-    //collect indexs of objects that has a revealed_score == 0
-    const index_of_hidden_reveals = selectedLineArray.map((obj, idx) => obj.revealed_score == 0 ? idx : -1).filter(idx => idx != -1);
-
-    //collect indexs of objects that has a revealed_score == 1
-    // const index_of_shown_reveals = selectedLineArray.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
-    // title sentence excluded
-    // this.index_of_shown_reveals_exclude_title = this.index_of_shown_reveals.filter((element) => element !== this.indexOfTitle);
-
-    //chosen object index to be replaced by 3 object
-    const chosenIndex = this.index_of_hidden_reveals[Math.floor(Math.random() * this.index_of_hidden_reveals.length)];
-    const chosenStart = selectedLineArray[chosenIndex].index_interval_start;
-    const chosenEnd = selectedLineArray[chosenIndex].index_interval_end;
-    const range = chosenEnd - chosenStart + 1;
-    const randomValue1 = Math.floor(Math.random() * range) + chosenStart;
-    const randomValue2 = Math.floor(Math.random() * range) + chosenStart;
-
-    let smallRandom: number;
-    let bigRandom: number;
-    if (randomValue1 > randomValue2) {
-      bigRandom = randomValue1;
-      smallRandom = randomValue2;
-    } else {
-      bigRandom = randomValue2;
-      smallRandom = randomValue1;
-    }
-    console.log("smallRandom is: " + smallRandom);
-    console.log("bigRandom is: " + bigRandom);
-    const insertRevealed = [
-      {
-        "index_interval_start": chosenStart,
-        "index_interval_end": smallRandom,
-        "revealed_score": 0,
-      },
-      {
-        "index_interval_start": smallRandom,
-        "index_interval_end": bigRandom,
-        "revealed_score": 1,
-      },
-      {
-        "index_interval_start": bigRandom,
-        "index_interval_end": chosenEnd,
-        "revealed_score": 0,
-      }
-    ];
     const lineArrayCopy = selectedLineArray.slice();
     // remove one from the chosenIndex and insert the entire insertRevealed array
     lineArrayCopy.splice(chosenIndex, 1, ...insertRevealed);
@@ -482,49 +522,85 @@ export class CreateInteractionWorkComponent implements OnInit {
   PassTimeToHide() { // 1 => (1, 0, 1)
     //collect indexs of objects that has a revealed_score == 1
     console.log("PassTimeToHide working.");
-    console.log("index_of_shown_reveals_exclude_title.length is: " + this.index_of_shown_reveals_exclude_title.length);
-    //chosen object index to be replaced by 3 object
-    const chosenIndex = this.index_of_shown_reveals_exclude_title[Math.floor(Math.random() * this.index_of_shown_reveals_exclude_title.length)];
-    console.log("chosenIndex in PassTimeToHide is: " + chosenIndex);
-    if(!chosenIndex) return;
-    const chosenStart = this.revealedObject[chosenIndex].index_interval_start;
-    console.log("chosenStart in PassTimeToHide is: " + chosenStart);
-    const chosenEnd = this.revealedObject[chosenIndex].index_interval_end;
-    console.log("chosenEnd in PassTimeToHide is: " + chosenEnd);
-    const range = chosenEnd - chosenStart + 1;
-    const randomValue1 = Math.floor(Math.random() * range) + chosenStart;
-    const randomValue2 = Math.floor(Math.random() * range) + chosenStart;
-
-    let smallRandom: number;
-    let bigRandom: number;
-    if (randomValue1 > randomValue2) {
-      bigRandom = randomValue1;
-      smallRandom = randomValue2;
-    } else {
-      bigRandom = randomValue2;
-      smallRandom = randomValue1;
-    }
-    console.log("smallRandom is: " + smallRandom);
-    console.log("bigRandom is: " + bigRandom);
-    let insertRevealed = [
-      {
-        "index_interval_start": chosenStart,
-        "index_interval_end": smallRandom,
-        "revealed_score": 1,
-      },
-      {
-        "index_interval_start": smallRandom,
-        "index_interval_end": bigRandom,
-        "revealed_score": 0,
-      },
-      {
-        "index_interval_start": bigRandom,
-        "index_interval_end": chosenEnd,
-        "revealed_score": 1,
+    let insertRevealed;
+    let selectedLineArray;
+    let chosenIndex;
+    let selectedLineIndex = -1;
+    while (true) {
+      let isValidLine = false
+      while(!isValidLine) {
+        // keep randomly select a line until it contain at least one revealed_score = 0
+        console.log("indexOfTitle is: " + this.indexOfTitle)
+        let randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
+        while (randomLineIndex == this.indexOfTitle) {
+          randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
+        }
+        console.log("randomLineIndex is :" + randomLineIndex);
+        const candidateLineArray = this.revealedObject[randomLineIndex];
+        isValidLine = candidateLineArray.some(element => element.revealed_score == 1);
+        if (isValidLine) {
+          selectedLineArray = candidateLineArray;
+          selectedLineIndex = randomLineIndex;
+        }
+        console.log("selectedLineIndex is :" + selectedLineIndex);
       }
-    ]
+      //collect indexs of objects that has a revealed_score == 1
+      const index_of_shown_reveals = selectedLineArray.map((obj, idx) => obj.revealed_score == 1 ? idx : -1).filter(idx => idx != -1);
+      console.log("index_of_hidden_reveals length is :" + index_of_shown_reveals.length);
+  
+      
+      //chosen object index to be replaced by 3 object
+      const chosenIndex = index_of_shown_reveals[Math.floor(Math.random() * index_of_shown_reveals.length)];
+      console.log("chosenIndex is :" + chosenIndex);
+      const chosenObject = selectedLineArray[chosenIndex];
+      const chosenStart = selectedLineArray[chosenIndex].index_interval_start;
+      console.log("chosenStart is :" + chosenStart);
+      const chosenEnd = selectedLineArray[chosenIndex].index_interval_end;
+      console.log("chosenEnd is :" + chosenEnd);
+      const range = chosenEnd - chosenStart + 1;
+      const randomValue1 = Math.floor(Math.random() * range) + chosenStart;
+      const randomValue2 = Math.floor(Math.random() * range) + chosenStart; 
+  
+      let smallRandom: number;
+      let bigRandom: number;
+      if (randomValue1 > randomValue2) {
+        bigRandom = randomValue1;
+        smallRandom = randomValue2;
+      } else {
+        bigRandom = randomValue2;
+        smallRandom = randomValue1;
+      }
+      console.log("smallRandom is: " + smallRandom);
+      console.log("bigRandom is: " + bigRandom);
+      insertRevealed = [
+        {
+          "index_interval_start": chosenStart,
+          "index_interval_end": smallRandom,
+          "revealed_score": 1,
+        },
+        {
+          "index_interval_start": smallRandom,
+          "index_interval_end": bigRandom,
+          "revealed_score": 0,
+        },
+        {
+          "index_interval_start": bigRandom,
+          "index_interval_end": chosenEnd,
+          "revealed_score": 1,
+        }
+      ];
+      //find matches, if so break and redo whole function again
+      const matches = insertRevealed.filter(obj => obj.index_interval_start === chosenStart && obj.index_interval_end === chosenEnd);
+      if (matches.length === 0) {
+        break;
+      }
+    }
+    const lineArrayCopy = selectedLineArray.slice();
+    // remove one from the chosenIndex and insert the entire insertRevealed array
+    lineArrayCopy.splice(chosenIndex, 1, ...insertRevealed);
+
     let isShowNotHide = false;
-    this.postRevealedToChange(this.originalParagraphId, chosenIndex, insertRevealed, isShowNotHide);
+    this.postRevealedToChange(this.originalParagraphId, selectedLineIndex, lineArrayCopy, isShowNotHide);
   }
 
   // -------- For resortable input fields --------------------------------
