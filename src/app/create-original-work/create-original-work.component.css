@@ -6,10 +6,9 @@
   align-items: left;
   text-align: left;
   margin: auto;
-  max-width: none;
+  max-width: 400px;
   padding: 20px;
 }
-
 * {
   box-sizing: border-box;
 }
@@ -52,3 +51,20 @@ button[type="submit"], button[type="welcome"]  {
   background-color: #a6c0f4;
   cursor: default;
 }
+
+.add-icon-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+  padding: 16px;
+}
+
+.add-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+

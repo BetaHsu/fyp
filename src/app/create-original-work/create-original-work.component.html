@@ -1,16 +1,16 @@
 <!-- top-nav-bar ------------------ -->
 <img src="assets/image/Re-collect logo.png" alt="Logo" style="
-width: 8%;"/>
+width: 8%; cursor: pointer;" (click)="goToHome()" />
 <!-- <button  type="welcome" (click)="goToHome()"> home</button> -->
 <div class="display--flex justify-content--flex-end">
-   <!-- <span class="material-symbols-outlined">
+    <!-- <span class="material-symbols-outlined">
         search
     </span> -->
     <span class="material-symbols-outlined">
         person
     </span>
     <p>{{ localStorUsername }}</p>
-    <button (click)="signOut()">Log out</button>
+    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
     <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
         sign in here
     </button>
@@ -22,38 +22,76 @@ width: 8%;"/>
     <p>@{{ localStorUsername }}</p>
 </div>
 <div class="auth-container">
-<!-- <p style="color: rgb(130, 130, 130)">To start, submit at least one original work of yours to enable interacting with other works</p> -->
-<div>
-    <textarea class="textarea-create-original" [(ngModel)]="inputText" *ngIf="!isButtonSaveClicked" 
-    id="originalParagraph" rows="20" 
-    placeholder="Write your original work here"></textarea>
+    <div style="margin: 20px; text-align: center;">
+        <p style="color: rgb(130, 130, 130)">You may submit original work of yours here</p>
+    </div>
+    <!-- <div style="display: flex;">
+        <p (click)="goToHome()" style=" cursor: pointer;">skip </p>
+        <p style="color: rgb(130, 130, 130);" > and browse others works to rewrite</p> 
+    </div>> -->
+    <div >
+        <!-- Resortable input text fields w/ add & remove buttons -->
+        <div *ngIf="!isButtonSaveClicked">
+            <div style="display: flex; align-items: flex-start;">
+                <div style="width: 100%;">
+                    <div *ngFor="let input of inputs; let i = index">
+                        <div class="input_container" style="display: flex; margin: 5px 0px;">
+                            <input [(ngModel)]="input.value" style="width: 90%; height:30px;" />
+                            <div *ngIf="inputs.length > 2">
+                                <span class="material-symbols-rounded" (click)="removeInput(i)"
+                                    style="cursor: pointer; margin: 0px 10px;">
+                                    delete
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- add field dot line button -->
+                    <div class="add-icon-container" (click)="addInput()" style="cursor: pointer;">
+                        <div class="add-icon-wrapper">
+                            <span class="material-symbols-rounded add-icon">
+                                add
+                            </span>
+                            <span class="add-icon-text">Add New Field</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <button (click)="goToHome()" type="instruction">skip</button> -->
+    </div>
+    <p *ngIf="isButtonSaveClicked" style="color: rgb(130, 130, 130)">Select one sentence as title. This will be the only
+        visible text among all by default.</p>
+    <!-- Display Full Original work -->
+    <div style="white-space: pre-line">
+        <p *ngIf="isButtonSaveClicked">Your Original work:</p>
 
-</div>
-<p *ngIf="isButtonSaveClicked" style="color: rgb(130, 130, 130)">Select one sentence as title. This will be the only visible text among all by default.</p>
-<!-- Display Full Original work -->
-<div style="white-space: pre-line">
-    <p *ngIf="isButtonSaveClicked">Your Original work:</p>
-
-    <!-- selct sentence to publish -->
-    <div *ngIf="isButtonSaveClicked">
-        <div *ngFor="let line of inputTextinArray; let i = index" 
-        [ngClass]= "i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
-            {{ line }}
+        <!-- selct sentence to publish -->
+        <div *ngIf="isButtonSaveClicked">
+            <div *ngFor="let line of inputTextinArray; let i = index"
+                [ngClass]="i === selectedLineIndex ? 'selected' : 'not-selected'" (click)="onLineClick(i)">
+                {{ line }}
+            </div>
         </div>
     </div>
-</div>
+    <div style="text-align: center;">
+        <!-- "Save" button -->
+        <!-- shown when "Save" not clicked & disabled when no input texts -->
+        <!-- <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting
+        Save)</p> -->
+        <button *ngIf="!isButtonSaveClicked" (click)="enableSaveButton(); getInputText()" [disabled]="!hasValidInputs()"
+            style="width: 90%;">
+            Save
+        </button>
+        <!-- "Publish" button -->
+        <!-- shown when "Save" is clicked & disabled when no line selected -->
+        <button *ngIf="isButtonSaveClicked" (click)="publishNewParagraph()" [disabled]="!lineSelected"
+            style="width: 90%;">
+            Publish
+        </button>
+        <!-- Enter re-collect -->
+        <button (click)="goToHome()" style="width: 80%; color: black; background-color: transparent;"> Skip and Enter
+            Re-collect</button>
 
-<!-- "Save" button -->
-<!-- shown when "Save" not clicked & disabled when no input texts -->
-<p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
-<button type="submit" *ngIf="!isButtonSaveClicked" (click)="enableSaveButton(); getInputText()" [disabled]="!inputText" >
-    Save
-</button>
+    </div>
 
-<!-- "Publish" button -->
-<!-- shown when "Save" is clicked & disabled when no line selected -->
-<button type="submit" *ngIf="isButtonSaveClicked" (click)="publishNewParagraph()" [disabled]="!lineSelected">
-    Publish
-</button>
-<button  type="welcome" *ngIf="isPublished" (click)="goToHome()"> Enter Re-collect</button>
 </div>

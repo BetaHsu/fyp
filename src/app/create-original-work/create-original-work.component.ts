@@ -142,8 +142,10 @@ export class CreateOriginalWorkComponent {
   }
 
   getInputText(){
-    this.inputTextinArray = this.inputText.split('\n');
-    console.log("entire input text is: " + this.inputTextinArray);
+    // this.inputTextinArray = this.inputText.split('\n');
+    this.inputs.forEach(input => this.inputTextinArray.push(input.value))
+    // console.log()
+    console.log("this.inputTextinArray is: " + this.inputTextinArray);
   }
 
   onLineClick(index : number) {
@@ -189,6 +191,23 @@ export class CreateOriginalWorkComponent {
 
   goToOnboarding(){
     this.router.navigate(['/onboarding']);
+  }
+
+  inputs = [{ value: '' },{ value: '' },{ value: '' }];
+  addInput() {
+    this.inputs.push({ value: '' });
+    // this.inputValues[this.items.indexOf(item)].push('');
+  }
+  
+  removeInput(index: number) {
+    this.inputs.splice(index, 1);
+    // this.inputValues[this.items.indexOf(item)].splice(index, 1);
+  }
+
+  hasValidInputs() {
+    const nonEmptyInputs = this.inputs.filter(i => i.value !== '');
+    console.log(nonEmptyInputs.length);
+    return nonEmptyInputs.length >= 2;
   }
 }
 

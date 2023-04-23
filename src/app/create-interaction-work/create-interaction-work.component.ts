@@ -45,8 +45,11 @@ export class CreateInteractionWorkComponent implements OnInit {
     })
 
     //fade after 24 
+    
+
     setInterval(() => {
       // this.PassTimeToHide();
+      
     }, 24 * 60 * 60 * 1000) // every 24 hours (24 hr * 60 min * 60 sec * 1000 millisec)
 
     // initialize inputValues array with default values
@@ -106,7 +109,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   showList = true;
   items = [
     { id: 'text1', rows: '6',  inputs: [{ value: '' },{ value: '' }], disabled: false, text:'sth1'  },
-    {  id: 'text2', rows: '2',  inputs: [{ value: this.currentTitle}], disabled: true, text:'sth2'},
+    {  id: 'text2', rows: '2',  inputs: [{ value: ''}], disabled: true, text:'sth2'},
     { id: 'text3', rows: '6',  inputs: [{ value: '' },{ value: '' }], disabled: false, text:'sth3'  }
   ];
   resortedInputValuesRevealed:{index_interval_start: number, index_interval_end: number, revealed_score: number}[][] = [];
@@ -134,6 +137,8 @@ export class CreateInteractionWorkComponent implements OnInit {
   // var for calculate reveal score
   indexOfTitle = -1;
   newRevealScoreToPublic = 0;
+
+  lastUpdateTime : any = undefined;;
 
   // var for testing revealing & hidding sections of paragraph
   fullParagraph : any = undefined;
@@ -183,35 +188,108 @@ export class CreateInteractionWorkComponent implements OnInit {
     )
     .then((response) => response.json()) 
     .then((data => {
+      this.lastUpdateTime = new Date(data.lastUpdate);
+      this.revealedObject = data.revealed;
+      this.indexOfTitle = data.title_index;
+      this.originalParagraphId = data._id;  
+      if(this.lastUpdateTime){
+        let newRevealedObject;
+        const currentTime = new Date();
+        const hoursSinceLastUpdate = (currentTime.getTime() - this.lastUpdateTime.getTime()) / (1000 * 60 * 60 * 12);
+        console.log(`7 Hours since last update: ${hoursSinceLastUpdate}`);
+        for (let i = 0; i<hoursSinceLastUpdate; i++ ){
+          newRevealedObject = this.PassTimeToHide(this.revealedObject);
+          this.revealedObject = newRevealedObject;
+        }
+        // console.log("newRevealedObject is: " + newRevealedObject);
+        let isShowNotHide = false;
+        
+        this.postHiddenToChange(this.originalParagraphId, newRevealedObject);
+        // this.postRevealedToChange(this.originalParagraphId, selectedLineIndex, lineArrayCopy, isShowNotHide);
+      } else {
+        this.generateParagraph(this.revealedObject);
+      }
       this.paragraph = data;
       this.paragraphArray = data.paragraphArray;
       this.paragraphArrayInString = data.paragraph;
-      this.revealedObject = data.revealed;
+      
       // console.log("data.revealed is: " + data.revealed)
       this.allParallelSentencesSent = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.sentence);
       this.allParallelSentencesId = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.id);
       this.currentId = this.route.snapshot.params['id'];
       console.log("allParallelSentences sentence length are:" + this.allParallelSentencesSent.length);
       this.allParallel = data.parallel_sentences; // entire parallel_sentences Object, no use for now
-      this.generateParagraph();
+      
       this.currentTitle = this.items[1].inputs[0].value = data.title;
       console.log("currentTitle is update to: "+ this.currentTitle);
-      this.originalParagraphId = data._id;  
+      
       console.log("originalParagraphId is: "+ this.originalParagraphId);
       this.renderParallel(this.allParallelSentencesSent);
-      this.indexOfTitle = data.title_index;
+      
       this.newRevealScoreToPublic = data.reveal_score_to_public;
+      this.calRevealScoreToPublic(this.revealedObject);
     }));
   }
-  generateParagraph() {
+  postHiddenToChange(originalParagraphId:any, newRevealedObject: any) {
+    console.log('Posting hidden.')
+    const data = {
+      originalParagraphId: originalParagraphId,
+      newRevealedObject: newRevealedObject,
+    };
+    fetch((environment.apiUrl + "/api/v1/post-hidden-to-change"), {
+      method: 'POST',
+      mode: 'cors',
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      let updatedRevealedObject = newRevealedObject;
+      console.log("updated RevealedObject!")
+      this.generateParagraph(updatedRevealedObject);
+      // this.calRevealScoreToPublic(updatedRevealedObject); 
+    })
+    .catch((error) => console.error(error));
+  }
+
+  // ------ Flask "POST" : Post new reveal object after showing or hiding -------------------
+  postRevealedToChange(originalParagraphId:any, selectedLineIndex:any, lineArrayCopy:any, isShownotHide:boolean){
+    console.log('Posting new Revealed to hidden.')
+    const data = {
+      originalParagraphId: originalParagraphId,
+      selectedLineIndex: selectedLineIndex,
+      lineArrayCopy: lineArrayCopy
+    };
+    fetch((environment.apiUrl + "/api/v1/post-revealed-to-change"), {
+      method: 'POST',
+      mode: 'cors',
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
+      body: JSON.stringify(data)
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      let updatedRevealedObject = data.updated_revealed_array;
+      console.log("updatedRevealedObject.length is: " + updatedRevealedObject.length)
+      this.calRevealScoreToPublic(updatedRevealedObject); 
+    })
+    .catch((error) => console.error(error));
+  }
+
+  generateParagraph(revealedObject: any) {
     // if revealed score 1 show (start~end) text, if reveal score 0 hide (start~end) rect boxes
     console.log("Generating paragraph")
     for (let i=0; i<this.paragraphArray.length; i++) {
       let line = this.paragraphArray[i];
-      let sections = this.revealedObject[i];
+      console.log("line is: " + line);
+      let sections = revealedObject[i];
       let sectionStrings:string[] = [];
       for (let j=0; j<sections.length; j++) {
         let section = sections[j];
+        console.log("line[" + i + "] section[" + j + "](start, end) is: " + section.index_interval_start, section.index_interval_end);
         let sectionText = line.substring(section.index_interval_start, section.index_interval_end);
         console.log("sectionText is: " + sectionText);
         let sectionClass;
@@ -220,8 +298,11 @@ export class CreateInteractionWorkComponent implements OnInit {
         } else {
           sectionClass = 'substring--hidden';
         }
-        sectionStrings.push(`<span class="${sectionClass}">${sectionText}</span>`);
+        let sectionString = `<span class="${sectionClass}">${sectionText}</span>`;
+        console.log(" lnie " + i + " section " + j + "sectionString is: " + sectionString);
+        sectionStrings.push(sectionString);
       }
+      console.log(" sectionString is: " + sectionStrings);
       this.output += sectionStrings.join('') + '<br>';
     }
     console.log("output is: " + this.output);
@@ -388,6 +469,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     let percentage = ((totalShow-titleCounts)/(totalCounts-titleCounts))*100;
     // console.log("typeof temp is: " + typeof percentage)
     this.newRevealScoreToPublic= +percentage.toFixed(1);
+    // this.newRevealScoreToPublic;
     console.log("newRevealScoreToPublic is: " + this.newRevealScoreToPublic);
     this.postNewScore(this.originalParagraphId, this.newRevealScoreToPublic);
   }
@@ -408,30 +490,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     .then((response) => console.log(response))
   }
 
-  // ------ Flask "POST" : Post new reveal object after showing or hiding -------------------
-  postRevealedToChange(originalParagraphId:any, selectedLineIndex:any, lineArrayCopy:any, isShownotHide:boolean){
-    console.log('Posting new Revealed to hidden.')
-    const data = {
-      originalParagraphId: originalParagraphId,
-      selectedLineIndex: selectedLineIndex,
-      lineArrayCopy: lineArrayCopy
-    };
-    fetch((environment.apiUrl + "/api/v1/post-revealed-to-change"), {
-      method: 'POST',
-      mode: 'cors',
-      // headers: {
-      //   "Content-Type": "application/json",
-      // },
-      body: JSON.stringify(data)
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      let updatedRevealedObject = data.updated_revealed_array;
-      console.log("updatedRevealedObject.length is: " + updatedRevealedObject.length)
-      this.calRevealScoreToPublic(updatedRevealedObject); 
-    })
-    .catch((error) => console.error(error));
-  }
+  
 
 
 
@@ -519,8 +578,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   }
 
   // ------------- To hide -----------------
-  PassTimeToHide() { // 1 => (1, 0, 1)
-    //collect indexs of objects that has a revealed_score == 1
+  PassTimeToHide(currentRevealedObject: any) { // 1 => (1, 0, 1)
     console.log("PassTimeToHide working.");
     let insertRevealed;
     let selectedLineArray;
@@ -531,12 +589,12 @@ export class CreateInteractionWorkComponent implements OnInit {
       while(!isValidLine) {
         // keep randomly select a line until it contain at least one revealed_score = 0
         console.log("indexOfTitle is: " + this.indexOfTitle)
-        let randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
+        let randomLineIndex = Math.floor(Math.random() * currentRevealedObject.length);
         while (randomLineIndex == this.indexOfTitle) {
-          randomLineIndex = Math.floor(Math.random() * this.revealedObject.length);
+          randomLineIndex = Math.floor(Math.random() * currentRevealedObject.length);
         }
         console.log("randomLineIndex is :" + randomLineIndex);
-        const candidateLineArray = this.revealedObject[randomLineIndex];
+        const candidateLineArray = currentRevealedObject[randomLineIndex];
         isValidLine = candidateLineArray.some(element => element.revealed_score == 1);
         if (isValidLine) {
           selectedLineArray = candidateLineArray;
@@ -595,12 +653,13 @@ export class CreateInteractionWorkComponent implements OnInit {
         break;
       }
     }
+
     const lineArrayCopy = selectedLineArray.slice();
     // remove one from the chosenIndex and insert the entire insertRevealed array
     lineArrayCopy.splice(chosenIndex, 1, ...insertRevealed);
-
-    let isShowNotHide = false;
-    this.postRevealedToChange(this.originalParagraphId, selectedLineIndex, lineArrayCopy, isShowNotHide);
+    currentRevealedObject[selectedLineIndex] = lineArrayCopy;
+    console.log("this.revealedObject updated!");
+    return currentRevealedObject;
   }
 
   // -------- For resortable input fields --------------------------------
@@ -615,7 +674,9 @@ export class CreateInteractionWorkComponent implements OnInit {
     for (let i = 0; i < this.items.length; i++) {
       const inputs = this.items[i].inputs;
       for (let j = 0; j < inputs.length; j++) {
-        this.resortedInputValues.push(inputs[j].value);
+        if(inputs[j].value){
+          this.resortedInputValues.push(inputs[j].value);
+        }
       }
     }
     this.resortedInputValuesString = this.resortedInputValues.join('');
@@ -740,6 +801,11 @@ export class CreateInteractionWorkComponent implements OnInit {
     localStorage.removeItem("userid");
     localStorage.removeItem("username");
     this.router.navigate(['/onboarding']);
+  }
+
+  hasNonEmptyInputs(): boolean {
+    return this.items[0].inputs.some(input => input.value !== '') &&
+           this.items[2].inputs.some(input => input.value !== '');
   }
 }
 

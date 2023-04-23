@@ -5,7 +5,7 @@ width: 8%; cursor: pointer;"/>
     <!-- <span class="material-symbols-outlined">
         search
     </span> -->
-    <span class="material-symbols-rounded" (click)="goToCreateOriginal()" style="cursor: pointer;">
+    <span *ngIf="isLoggedIn" class="material-symbols-rounded" (click)="goToCreateOriginal()" style="cursor: pointer;">
         post_add
     </span>
     <span class="material-symbols-rounded">

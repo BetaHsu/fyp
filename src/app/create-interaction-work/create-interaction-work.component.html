@@ -67,24 +67,8 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             </div>
             <p style="color: rgb(130, 130, 130)">{{interactionInstruction1}}</p>
             
-            <!-- Original: resortable list for 3 input fields -->
-            <!-- <form #resortableList cdkDropList (cdkDropListDropped)="drop($event)">
-                <div *ngFor="let item of items; let i = index" cdkDrag>
-                    <div class="input-wrapper">
-                        <span class="material-symbols-outlined drag-handle">
-                            drag_indicator
-                        </span>
-                    </div>
-                    <textarea class="drag-textarea" [id]="'text' + i" [rows]="item.rows"
-                    [placeholder]="item.placeholder?.trim()" [(ngModel)]="item.text" 
-                    [name]="'item-' + i" [ngModelOptions]="{standalone: true}" 
-                    [disabled]="item.disabled" ></textarea>
-                    <input [id]="'placeholder' + i" [type]="'hidden'" [(ngModel)]="item.placeholder" 
-                    [name]="'placeholder-' + i" [ngModelOptions]="{standalone: true}" />
-                </div>
-            </form> -->
 
-            <!-- attempt 3: for testing drag and drop -->
+            <!-- Resortable input text fields w/ add & remove buttons -->
             <div *ngIf="showList">
                 <div cdkDropList (cdkDropListDropped)="onDrop($event)">
                     <div *ngFor="let item of items" cdkDrag>
@@ -137,7 +121,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
             <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once hitting Save)</p>
             <div class="justify-content--flex-end display--flex margin-top--24">
                 <button  *ngIf="!isButtonSaveClicked" (click)="getSortedItems(); hideResortableList()"  
-                [disabled]="(items[0].text && items[2].text) ? false : true" >Save</button>
+                [disabled]="!hasNonEmptyInputs()" >Save</button>
             </div>
             <!-- "Publish" button -->
             <!-- shown when "Save" is clicked & disabled when no line selected -->
@@ -158,7 +142,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
 
             <!-- for testing hidong and revealing -->
             <button (click)="contributeToShow()">contribute to show</button>
-            <button (click)="PassTimeToHide()">pass time to hide</button>
+            <!-- <button (click)="PassTimeToHide()">pass time to hide</button> -->
         </div>
     </div>
 </div>
