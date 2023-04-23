@@ -54,8 +54,11 @@ export class CreateOriginalWorkComponent {
   sectionAfterStartIndex = 0;
   sectionAfterEndIndex = 0;
   sectionAfter: string = " ";
+  inputTextinString = "";
+  inputValuesRevealed:any;
 
   newParagraphObjectId: any = " ";
+  inputs = [{ value: '' },{ value: '' },{ value: '' }];
 
   // ------ Flask "POST" : Post Original paragraph -------------------
   publishNewParagraph() {
@@ -64,39 +67,22 @@ export class CreateOriginalWorkComponent {
     // this.newParagraphObjectId = objectId;
     let paragraph = {
       "title": this.selectedTitle,
-      "title_interval_start": this.startIndexofSelected,
-      "title_interval_end": this.endIndexofSelected,
-      "paragraph": this.inputTextinArrayWithBreak,
+      "title_index": this.selectedLineIndex,
+      "paragraphArray": this.inputTextinArray,
+      "paragraph": this.inputTextinString,
       "id": Date.now().toString(),
       "creator_id": localStorage.getItem('userid'),
       "creator_username": this.localStorUsername,
-      "reveal_score": 0,
+      "reveal_score_to_public": 0,
       "parallel_sentences": [
         {
           // "id": this.newParagraphObjectId,
           "sentence": this.selectedTitle,
         }
       ],
-      "revealed": [
-        {
-          "index_interval_start": this.sectionBeforeStartIndex,
-          "index_interval_end": this.sectionBeforeEndIndex,
-          "revealed_score": 0,
-        },
-        {
-          "index_interval_start": this.startIndexofSelected,
-          "index_interval_end": this.endIndexofSelected,
-          "revealed_score": 1,
-        },
-        {
-          "index_interval_start": this.sectionAfterStartIndex,
-          "index_interval_end": this.sectionAfterEndIndex,
-          "revealed_score": 0,
-        }
-      ]
+      "revealed": this.inputValuesRevealed
     }
     this.postParagraph(paragraph);
-    // this.postWorkIdToUser(this.newParagraphObjectId, this.localStorUsername);
     this.isPublished = true;
   }
 
@@ -134,17 +120,9 @@ export class CreateOriginalWorkComponent {
     )
     .then((response) => console.log(response))
   }
-
-
-
-  enableSaveButton() {
-    this.isButtonSaveClicked = true;
-  }
-
+  
   getInputText(){
-    // this.inputTextinArray = this.inputText.split('\n');
     this.inputs.forEach(input => this.inputTextinArray.push(input.value))
-    // console.log()
     console.log("this.inputTextinArray is: " + this.inputTextinArray);
   }
 
@@ -152,27 +130,42 @@ export class CreateOriginalWorkComponent {
     this.selectedLineIndex = index;
     this.lineSelected = true;
     this.selectedTitle = this.inputTextinArray[this.selectedLineIndex];
-    this.inputTextinArrayWithBreak = this.inputTextinArray.join('<br>')
-
+    this.inputTextinString = this.inputTextinArray.join('')
     console.log("title sentence is" + this.selectedTitle);
-    console.log("type of inputTextinArray is: " + typeof this.inputTextinArray);
-    console.log("type of inputTextinArrayWithBreak is: " + typeof this.inputTextinArrayWithBreak);
 
-    this.startIndexofSelected = this.inputTextinArrayWithBreak.indexOf(this.selectedTitle);
-    this.endIndexofSelected = this.startIndexofSelected + this.selectedTitle.length;
-
-    this.sectionBeforeStartIndex = 0;
-    this.sectionBeforeEndIndex = this.startIndexofSelected;
-    this.sectionBefore = this.inputTextinArrayWithBreak.slice(this.sectionBeforeStartIndex, this.sectionBeforeEndIndex + 1);
-    this.sectionAfterStartIndex = this.endIndexofSelected;
-    this.sectionAfterEndIndex = this.inputTextinArrayWithBreak.length;
-    this.sectionAfter = this.inputTextinArrayWithBreak.slice(this.sectionAfterStartIndex, this.sectionAfterEndIndex + 1);
+    //calculate revealed object
+    this.inputValuesRevealed = this.inputTextinArray.map(
+      (line: string, i: number) => [{index_interval_start: 0, index_interval_end: line.length, revealed_score: 0}]
+    )
+    this.inputValuesRevealed[index][0].revealed_score = 1;
   }
 
+  // ------ for input text fields -------
+  
+  addInput() {
+    this.inputs.push({ value: '' });
+    // this.inputValues[this.items.indexOf(item)].push('');
+  }
+  
+  removeInput(index: number) {
+    this.inputs.splice(index, 1);
+    // this.inputValues[this.items.indexOf(item)].splice(index, 1);
+  }
+
+  hasValidInputs() {
+    const nonEmptyInputs = this.inputs.filter(i => i.value !== '');
+    // console.log(nonEmptyInputs.length);
+    return nonEmptyInputs.length >= 2;
+  }
+
+  enableSaveButton() {
+    this.isButtonSaveClicked = true;
+  }
+
+  // ------ for routing --------
   goToOwnerView() {
     this.router.navigate(['/create-interaction-work', this.newParagraphObjectId], { queryParams: {fromCreateOriginalWork: true}});
   }
-
 
   goToNewComponent(){
     const id = this.newParagraphObjectId;
@@ -193,21 +186,8 @@ export class CreateOriginalWorkComponent {
     this.router.navigate(['/onboarding']);
   }
 
-  inputs = [{ value: '' },{ value: '' },{ value: '' }];
-  addInput() {
-    this.inputs.push({ value: '' });
-    // this.inputValues[this.items.indexOf(item)].push('');
-  }
-  
-  removeInput(index: number) {
-    this.inputs.splice(index, 1);
-    // this.inputValues[this.items.indexOf(item)].splice(index, 1);
-  }
-
-  hasValidInputs() {
-    const nonEmptyInputs = this.inputs.filter(i => i.value !== '');
-    console.log(nonEmptyInputs.length);
-    return nonEmptyInputs.length >= 2;
+  goToStarter(){
+    this.router.navigate(['/starter']);
   }
 }
 

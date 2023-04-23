@@ -1,21 +1,43 @@
 <!-- top-nav-bar ------------------ -->
 <img src="assets/image/Re-collect logo.png" alt="Logo" style="
-width: 8%; cursor: pointer;"/>
+width: 100px; cursor: pointer;"/>
 <div class="display--flex justify-content--flex-end">
-    <!-- <span class="material-symbols-outlined">
-        search
-    </span> -->
-    <span *ngIf="isLoggedIn" class="material-symbols-rounded" (click)="goToCreateOriginal()" style="cursor: pointer;">
-        post_add
-    </span>
-    <span class="material-symbols-rounded">
-        person
-    </span>
-    <p>{{ localStorUsername }}</p>
-    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
-    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" type="instruction">
-        sign in here
-    </button>
+    <div class="top-nav-container">
+        <button (click)="goToStarter()" style="display:inline-flex; align-items: center; color: #4d4d4d; background-color: transparent;">
+            <span class="material-symbols-rounded" style="cursor: pointer; margin: 0px 5px;">
+                info
+            </span>
+            <p style="font-size: small;">About Re-Collect</p>
+        </button>
+        <!-- <span class="material-symbols-outlined">
+            search
+        </span> -->
+        <button (click)="goToCreateOriginal()" style="display:inline-flex; align-items: center; color: #4d4d4d; background-color: transparent;">
+            <span class="material-symbols-rounded" style="cursor: pointer;">
+                post_add
+            </span>
+            <p style=" font-size: small;">Create Original Work</p>
+        </button>
+        <div class="person-container">
+            <span class="material-symbols-rounded">
+                person
+            </span>
+            <p *ngIf="isLoggedIn">{{ localStorUsername }}</p>
+            <p *ngIf="!isLoggedIn">guest</p>
+        </div>
+        <button *ngIf="isLoggedIn" (click)="signOut()" style="color: #3b3b3b; background-color: transparent;">
+            <span class="material-symbols-rounded" style="cursor: pointer;">
+                logout
+            </span>
+            <p style="font-size: small;">Log out</p>
+        </button>
+        <!-- <button *ngIf="isLoggedIn" (click)="signOut()" type="instruction">
+            Log out
+        </button> -->
+        <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" type="instruction">
+            sign in here
+        </button>
+    </div>
 </div>
 
 <h2 style="text-align:center">Public Gallery Page</h2>

@@ -1,19 +1,38 @@
 <!-- top-nav-bar ------------------ -->
 <img src="assets/image/Re-collect logo.png" alt="Logo" style="
-width: 8%; cursor: pointer;" (click)="goToHome()" />
+width: 100px; cursor: pointer;" (click)="goToHome()" />
 <!-- <button  type="welcome" (click)="goToHome()"> home</button> -->
 <div class="display--flex justify-content--flex-end">
-    <!-- <span class="material-symbols-outlined">
-        search
-    </span> -->
-    <span class="material-symbols-outlined">
-        person
-    </span>
-    <p>{{ localStorUsername }}</p>
-    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
-    <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" style="border: none;">
-        sign in here
-    </button>
+    <div class="top-nav-container">
+        <button (click)="goToStarter()" style="display:inline-flex; align-items: center; color: #4d4d4d; background-color: transparent;">
+            <span class="material-symbols-rounded" style="cursor: pointer; margin: 0px 5px;">
+                info
+            </span>
+            <p style="font-size: small;">About Re-Collect</p>
+        </button>
+        <!-- <span class="material-symbols-outlined">
+            search
+        </span> -->
+        <div class="person-container">
+            <span class="material-symbols-rounded">
+                person
+            </span>
+            <p *ngIf="isLoggedIn">{{ localStorUsername }}</p>
+            <p *ngIf="!isLoggedIn">guest</p>
+        </div>
+        <button *ngIf="isLoggedIn" (click)="signOut()" style="color: #3b3b3b; background-color: transparent;">
+            <span class="material-symbols-rounded" style="cursor: pointer;">
+                logout
+            </span>
+            <p style="font-size: small;">Log out</p>
+        </button>
+        <!-- <button *ngIf="isLoggedIn" (click)="signOut()" type="instruction">
+            Log out
+        </button> -->
+        <button *ngIf="!isLoggedIn" (click)="goToOnboarding()" type="instruction">
+            sign in here
+        </button>
+    </div>
 </div>
 
 <h2 style="text-align:center">Create Original Work</h2>
@@ -29,7 +48,6 @@ width: 8%; cursor: pointer;" (click)="goToHome()" />
         <p (click)="goToHome()" style=" cursor: pointer;">skip </p>
         <p style="color: rgb(130, 130, 130);" > and browse others works to rewrite</p> 
     </div>> -->
-    <div >
         <!-- Resortable input text fields w/ add & remove buttons -->
         <div *ngIf="!isButtonSaveClicked">
             <div style="display: flex; align-items: flex-start;">
@@ -58,7 +76,6 @@ width: 8%; cursor: pointer;" (click)="goToHome()" />
             </div>
         </div>
         <!-- <button (click)="goToHome()" type="instruction">skip</button> -->
-    </div>
     <p *ngIf="isButtonSaveClicked" style="color: rgb(130, 130, 130)">Select one sentence as title. This will be the only
         visible text among all by default.</p>
     <!-- Display Full Original work -->
@@ -88,6 +105,7 @@ width: 8%; cursor: pointer;" (click)="goToHome()" />
             style="width: 90%;">
             Publish
         </button>
+        <p *ngIf="isPublished">Successfully published!</p>
         <!-- Enter re-collect -->
         <button (click)="goToHome()" style="width: 80%; color: black; background-color: transparent;"> Skip and Enter
             Re-collect</button>

@@ -1,4 +1,15 @@
  
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+    margin: auto;
+    max-width: 400px;
+    padding: 20px;
+}
+
 form {
     display: flex;
     flex-direction: column;

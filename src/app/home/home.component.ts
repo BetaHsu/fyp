@@ -144,4 +144,8 @@ export class HomeComponent {
   goToCreateOriginal(){
     this.router.navigate(['/create-original-work']);
   }
+
+  goToStarter(){
+    this.router.navigate(['/starter']);
+  }
 }

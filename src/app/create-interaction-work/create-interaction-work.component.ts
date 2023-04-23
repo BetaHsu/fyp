@@ -192,23 +192,23 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.revealedObject = data.revealed;
       this.indexOfTitle = data.title_index;
       this.originalParagraphId = data._id;  
-      if(this.lastUpdateTime){
+      // if(this.lastUpdateTime){
         let newRevealedObject;
         const currentTime = new Date();
         const hoursSinceLastUpdate = (currentTime.getTime() - this.lastUpdateTime.getTime()) / (1000 * 60 * 60 * 12);
         console.log(`7 Hours since last update: ${hoursSinceLastUpdate}`);
-        for (let i = 0; i<hoursSinceLastUpdate; i++ ){
-          newRevealedObject = this.PassTimeToHide(this.revealedObject);
-          this.revealedObject = newRevealedObject;
-        }
+        // for (let i = 0; i<hoursSinceLastUpdate; i++ ){
+        //   newRevealedObject = this.PassTimeToHide(this.revealedObject);
+        //   this.revealedObject = newRevealedObject;
+        // }
         // console.log("newRevealedObject is: " + newRevealedObject);
         let isShowNotHide = false;
         
-        this.postHiddenToChange(this.originalParagraphId, newRevealedObject);
+        // this.postHiddenToChange(this.originalParagraphId, newRevealedObject);
         // this.postRevealedToChange(this.originalParagraphId, selectedLineIndex, lineArrayCopy, isShowNotHide);
-      } else {
+      // } else {
         this.generateParagraph(this.revealedObject);
-      }
+      // }
       this.paragraph = data;
       this.paragraphArray = data.paragraphArray;
       this.paragraphArrayInString = data.paragraph;
@@ -335,8 +335,6 @@ export class CreateInteractionWorkComponent implements OnInit {
     console.log("Publish new paragraph.");
     let paragraph = {
       "title": this.nextSentenceForParallel,
-      // "title_interval_start": this.startIndexofSelected,
-      // "title_interval_end": this.endIndexofSelected,
       "title_index": this.selectedLineIndex,
       "paragraphArray": this.resortedInputValues,
       "paragraph": this.resortedInputValuesString,
@@ -795,6 +793,10 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   goToCreateOriginal(){
     this.router.navigate(['/create-original-work']);
+  }
+
+  goToStarter(){
+    this.router.navigate(['/starter']);
   }
 
   signOut() {

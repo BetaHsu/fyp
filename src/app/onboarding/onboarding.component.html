@@ -8,7 +8,12 @@ width: 8%; cursor: pointer;" (click)="goToHome()"/>
     <span class="material-symbols-outlined">
         person
     </span> -->
-    <button *ngIf="isLoggedIn" (click)="signOut()">Log out</button>
+    <button *ngIf="isLoggedIn" (click)="signOut()" style="color: #3b3b3b; background-color: transparent;">
+        <span class="material-symbols-rounded" style="cursor: pointer;">
+            logout
+        </span>
+        <p style="font-size: small;">Log out</p>
+    </button>
 </div>
 <div class="auth-container">
     <h2>{{ isSigningUp ? 'Sign Up' : 'Sign In'}}</h2>
