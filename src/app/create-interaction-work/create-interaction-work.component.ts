@@ -16,7 +16,7 @@ import { FormControl, FormBuilder } from '@angular/forms';
 export class CreateInteractionWorkComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder) {
   }
-
+  alreadyRefreshed = false;
   // Initialize: load paragraph database & check if route from create-original-work or home
   ngOnInit(): void {
     const username = localStorage.getItem("username");
@@ -33,6 +33,11 @@ export class CreateInteractionWorkComponent implements OnInit {
       }
       const myVar = parseInt(params['myVar']);
       this.view = myVar;
+      // console.log("Refreshing page..." + this.alreadyRefreshed)
+      // if (params['refresh'] && !this.alreadyRefreshed) {
+      //   this.alreadyRefreshed = true;
+      //   location.reload();
+      // }
     })
     const currentUsername = localStorage.getItem("username")
     if(currentUsername){
@@ -45,14 +50,20 @@ export class CreateInteractionWorkComponent implements OnInit {
     })
 
     //fade after 24 
-    
-
     setInterval(() => {
       // this.PassTimeToHide();
       
     }, 24 * 60 * 60 * 1000) // every 24 hours (24 hr * 60 min * 60 sec * 1000 millisec)
 
     // initialize inputValues array with default values
+    this.initializeInputValues();
+    // for (let i = 0; i < this.items.length; i++) {
+    //   const item = this.items[i];
+    //   const values = item.inputs.map(input => input.value);
+    //   this.inputValues.push(values);
+    // }
+  }
+  initializeInputValues() {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
       const values = item.inputs.map(input => input.value);
@@ -192,6 +203,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.revealedObject = data.revealed;
       this.indexOfTitle = data.title_index;
       this.originalParagraphId = data._id;  
+      this.paragraphArray = data.paragraphArray;
       // if(this.lastUpdateTime){
         let newRevealedObject;
         const currentTime = new Date();
@@ -210,7 +222,7 @@ export class CreateInteractionWorkComponent implements OnInit {
         this.generateParagraph(this.revealedObject);
       // }
       this.paragraph = data;
-      this.paragraphArray = data.paragraphArray;
+      
       this.paragraphArrayInString = data.paragraph;
       
       // console.log("data.revealed is: " + data.revealed)
@@ -323,6 +335,7 @@ export class CreateInteractionWorkComponent implements OnInit {
         // is community member
         this.can_access_views = [false, true, true, false];
         console.log("is community member!")
+        // getRewritingWork();
       } else { // is general public
         this.can_access_views = [true, false, true, false];
         console.log("is public!")
@@ -741,18 +754,26 @@ export class CreateInteractionWorkComponent implements OnInit {
   otherParallelTextWithSpanBreak:string=" ";
 
   renderParallel(allParallelSentencesSent:any){
-    if (allParallelSentencesSent.length > 1){
+    console.log("rendering parallel");
+    if (allParallelSentencesSent.length > 1){ // if not only itself
       this.lastParallelSent = allParallelSentencesSent[allParallelSentencesSent.length-1];
+      
       this.lastParallelId = this.allParallelSentencesId[allParallelSentencesSent.length-1];
+      this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
+      this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and last
+      console.log("otherParallelText is:" + this.otherParallelText);
+      this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
+      this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
+      // console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
+      // console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
       // console.log("lastParallel is:" + this.lastParallelSent);
     }
-    this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
-    this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and 2nd
-    // console.log("otherParallelText is:" + this.otherParallelText);
-    this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
-    this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
-    // console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
-    // console.log("otherParallelTextWithSpanBreak is:" + this.otherParallelTextWithSpanBreak);
+    else {
+      this.lastParallelSent = " ";
+      this.lastParallelId = " ";
+    }
+    console.log("lastParallelSent is: " + this.lastParallelSent);
+    console.log("lastParallelId is: " + this.lastParallelId);
   }
 
   // ------ For DropDown for different views -------------------
@@ -776,11 +797,28 @@ export class CreateInteractionWorkComponent implements OnInit {
 
   // -------------- For routing ------------------- 
   goToEachParallel(paragraphId: string) {
-    const extras: NavigationExtras = {
-      skipLocationChange: true,
-    };
-    // this.router.navigate(['/create-interaction-work', paragraphId], {queryParams: {myVar: 2}});
-    this.router.navigate(['/create-interaction-work', paragraphId], { queryParams: { myVar: 2 }, skipLocationChange: true });
+    // const navigationExtras: NavigationExtras = {
+    //   queryParams: { 'refresh': new Date().getTime() } // Add a timestamp query parameter to force refresh
+    // };
+    // const extras: NavigationExtras = {
+    //   skipLocationChange: true,
+    // };
+    // this.router.navigate(['/create-interaction-work', paragraphId], {queryParams: {myVar: 2}});//, ...navigationExtras
+    
+    this.router.navigate(['/create-interaction-work', paragraphId], { queryParams: { myVar: 2 }}).then(() => {
+      // window.location.reload();
+    });
+    this.output = "";
+    this.allParallelSentencesSent = [];
+    this.allParallelSentencesId = [];
+    this.inputValues = [];
+    this.inputValues.fill([]);
+    // this.getParagraph(paragraphId);
+    Promise.all([this.getUserWorks(this.localStorUsername), this.getParagraph(paragraphId)])
+    .then(() => {
+      this.getUserRestriction();
+    })
+    this.initializeInputValues();
   }
 
   goToHome() { // go to home instead

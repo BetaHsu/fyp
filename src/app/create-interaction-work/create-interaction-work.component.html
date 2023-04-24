@@ -77,7 +77,10 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
             <!-- if not "Save", show partially visible paragraph -->
             <p *ngIf="isButtonSaveClicked==false" [innerHTML]="output"></p>
             <!-- if "Save", show fully visible paragraph -->
-            <p *ngIf="isButtonSaveClicked==true">{{ paragraphArrayInString }}</p>
+            <div *ngFor="let line of paragraphArray; let i = index" >
+                <p *ngIf="isButtonSaveClicked==true">{{ line }}</p>
+            </div>
+            <!-- <p *ngIf="isButtonSaveClicked==true">{{ paragraphArrayInString.join() }}</p> -->
 
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
@@ -158,7 +161,7 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
             <h4>Parallel collaborative work</h4>
             <p style="font-weight: bold">{{ currentTitle }}</p>
             <p [innerHTML]="otherParallelTextWithSpanBreak"></p>
-            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
+            <p *ngIf="allParallelSentencesSent.length > 1" class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
             <!-- <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p> -->
 
 
@@ -184,29 +187,40 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <p [innerHTML]="output"></p>
+            <div *ngFor="let line of paragraphArray; let i = index">
+                <p>{{ line }}</p>
+            </div>
+            <!-- <p [innerHTML]="output"></p> -->
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
-            <p style="color: rgb(130, 130, 130)">Your Rewriting Work:</p>
-            <p style="color: rgb(130, 130, 130)">(only fully visible to you)</p><br>
-            <p [innerHTML]="inputTextResorted.join('<br>')"></p>
+            <!-- only show rewriting work if just posted (to-be-changed to fetching rewriign work from database) -->
+            <p *ngIf="resortedInputValues" style="color: rgb(130, 130, 130)">Your Rewriting Work:</p>
+            <p *ngIf="resortedInputValues" style="color: rgb(130, 130, 130)">(only fully visible to you)</p><br>
+            <div *ngFor="let line of resortedInputValues; let i = index">
+                {{ line }}
+            </div>
+            <!-- <p [innerHTML]="inputTextResorted.join('<br>')"></p> -->
         </div>
 
         <!-- Parallel work -->
         <div class="column" style="background-color:rgb(250, 250, 250);">
             <h4>Parallel collaborative work</h4>
-            <p style="color: rgb(130, 130, 130)">You have contributed to the next sentence of the parallel work. Click
-                each sentence to access other rewritings based on the same original work.</p>
+            <p style="color: rgb(130, 130, 130)">You have contributed to one sentence of the parallel work. Click
+                each sentence to access others rewritings versions.</p>
             <br>
             <p style="font-weight: bold">{{ currentTitle }}</p>
             <!-- <p [innerHTML]="otherParallelTextWithBreak"></p> -->
-            <div *ngFor="let line of otherParallelText; let i = index">
-                <!-- {{ line }} -->
-                <p class="clickable" (click)="goToEachParallel(otherParallelTextId[i])">{{ line }}</p>
+            <div *ngIf="allParallelSentencesSent.length > 1">
+                <div *ngFor="let line of otherParallelText; let i = index">
+                    <!-- {{ line }} -->
+                    <p class="clickable" (click)="goToEachParallel(otherParallelTextId[i])">
+                        {{ line }}
+                    </p>
+                </div>
+                <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
+                <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p>
             </div>
-            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
-            <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p>
         </div>
     </div>
 </div>
@@ -264,7 +278,10 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
         <div class="column" style="background-color:#ffffff;">
             <h4>Original work</h4>
             <!-- <p *ngIf="paragraph">{{ paragraph.paragraph }}</p> -->
-            <p [innerHTML]="paragraphArrayInString"></p>
+            <div *ngFor="let line of paragraphArray; let i = index">
+                <p>{{ line }}</p>
+            </div>
+            <!-- <p [innerHTML]="paragraphArrayInString"></p> -->
             <div class="w3-border">
                 <div class="w3-grey" style="height:24px;width:20%"></div>
             </div>
@@ -277,13 +294,21 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
                 work.</p>
             <br>
             <p style="font-weight: bold">{{ currentTitle }}</p>
-            <p [innerHTML]="otherParallelTextWithBreak"></p>
-            <div *ngFor="let line of otherParallelText; let i = index"
-                (click)="goToEachParallel(otherParallelTextId[i])">
-                {{ line }}
+            <div *ngIf="allParallelSentencesSent.length > 1">
+                <div *ngFor="let line of otherParallelText; let i = index">
+                    <!-- {{ line }} -->
+                    <p class="clickable" (click)="goToEachParallel(otherParallelTextId[i])">
+                        {{ line }}
+                    </p>
+                </div>
+                <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
+                <!-- <p *ngIf="selectedLineIndex !== undefined">{{ nextSentenceForParallel }}</p> -->
             </div>
-            <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p>
-            <p *ngIf="selectedLineIndex !== undefined">{{ inputTextResorted[selectedLineIndex] }}</p>
+
+
+            <!-- <p [innerHTML]="otherParallelTextWithBreak"></p> -->
+            <!-- <p class="clickable" (click)="goToEachParallel(lastParallelId)">{{ lastParallelSent }}</p> -->
+            <!-- <p *ngIf="selectedLineIndex !== undefined">{{ inputTextResorted[selectedLineIndex] }}</p> -->
         </div>
     </div>
 </div>
