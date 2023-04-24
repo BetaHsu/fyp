@@ -847,6 +847,214 @@ export class CreateInteractionWorkComponent implements OnInit {
     return this.items[0].inputs.some(input => input.value !== '') &&
            this.items[2].inputs.some(input => input.value !== '');
   }
+
+
+
+
+  // -------- Hide and Show functions ----------------
+  // makeRevealedFromParagraph(
+  //   paragraph: readonly string[],
+  //   titleIndex: number
+  // ): RevealedObject[][] {
+  //   return paragraph.map<RevealedObject[]>((line, idx) => {
+  //     if (idx === titleIndex) {
+  //       return [
+  //         {
+  //           index_interval_start: 0,
+  //           index_interval_end: line.length,
+  //           revealed_score: 1,
+  //           is_title: true,
+  //         },
+  //       ];
+  //     }
+  
+  //     return [
+  //       {
+  //         index_interval_start: 0,
+  //         index_interval_end: line.length,
+  //         revealed_score: 0,
+  //       },
+  //     ];
+  //   });
+  // }
+  
+  // // get the indices of all RevealedObjects in an array with a specific revealed_score, not including titles
+  // findRevealedObjectIndices(
+  //   revealed: RevealedObject[],
+  //   revealed_score: 0 | 1
+  // ): number[] {
+  //   return revealed
+  //     .map((obj, idx) =>
+  //       obj.revealed_score === revealed_score && !obj.is_title ? idx : -1
+  //     )
+  //     .filter((idx) => idx !== -1);
+  // }
+  
+  // // runs findRevealedObjectIndices for each line, returning a nested array where the first level is a line, and the second level are the indices of revealed objects
+  // findLinesRevealedObjectIndices(
+  //   revealed: RevealedObject[][],
+  //   revealed_score: 0 | 1
+  // ): number[][] {
+  //   return revealed.map((line) =>
+  //     this.findRevealedObjectIndices(line, revealed_score)
+  //   );
+  // }
+  
+  // // gets the indices of all lines which contain at least one RevealedObject with a specific revealed_score
+  // findRevealedObjectArrayLineIndices(
+  //   revealed: RevealedObject[][],
+  //   revealed_score: 0 | 1
+  // ): number[] {
+  //   const lineIndicesArray = this.findLinesRevealedObjectIndices(
+  //     revealed,
+  //     revealed_score
+  //   );
+  //   return lineIndicesArray
+  //     .map((lineIndices, idx) => (lineIndices.length !== 0 ? idx : -1))
+  //     .filter((idx) => idx !== -1);
+  // }
+  
+  // // random integer up to but not including max
+  // randomInteger(max: number): number {
+  //   return Math.floor(Math.random() * max);
+  // }
+  
+  // // random integer starting from and including min, and up to but not including max
+  // randomIntegerBetween(min: number, max: number): number {
+  //   min = Math.ceil(min);
+  //   max = Math.floor(max);
+  //   return Math.floor(Math.random() * (max - min) + min);
+  // }
+  
+  // // returns a copy of an array of RevealedObjects where the object at the specified index is split at a random point in the interval
+  // // the middle object in the split will have the opposite revealed score of the original object
+  // splitRevealedAtIndex(
+  //   revealed: RevealedObject[],
+  //   index: number
+  // ): RevealedObject[] {
+  //   // make a copy
+  //   const result = revealed.slice();
+  //   const object = result[index];
+  //   // the index isn't valid, don't change anything
+  //   if (!object || object.is_title) return result;
+  
+  //   const old_revealed_score = object.revealed_score;
+  //   // hide a reveal or reveal a hide, depending on the old score
+  //   const new_revealed_score: 0 | 1 = old_revealed_score === 1 ? 0 : 1;
+  
+  //   // shouldn't be, but maybe empty interval or single character, if that's the case just change the revealed score and return
+  //   if (object.index_interval_end - object.index_interval_start <= 1) {
+  //     result[index] = {
+  //       ...object,
+  //       revealed_score: new_revealed_score,
+  //     };
+  
+  //     return result;
+  //   }
+  
+  //   const random_start = this.randomIntegerBetween(
+  //     object.index_interval_start,
+  //     object.index_interval_end
+  //   );
+  //   const random_end = this.randomIntegerBetween(
+  //     random_start + 1,
+  //     object.index_interval_end
+  //   );
+  
+  //   const new_objects: RevealedObject[] = [];
+  
+  //   // only add a split for the start if the random start isn't the original start
+  //   if (random_start != object.index_interval_start) {
+  //     new_objects.push({
+  //       index_interval_start: object.index_interval_start,
+  //       index_interval_end: random_start,
+  //       revealed_score: old_revealed_score,
+  //     });
+  //   }
+  //   new_objects.push({
+  //     index_interval_start: random_start,
+  //     index_interval_end: random_end,
+  //     revealed_score: new_revealed_score,
+  //   });
+  //   // only add a split for the end if the random end isn't the original end
+  //   if (random_end != object.index_interval_end) {
+  //     new_objects.push({
+  //       index_interval_start: random_end,
+  //       index_interval_end: object.index_interval_end,
+  //       revealed_score: old_revealed_score,
+  //     });
+  //   }
+  
+  //   // replace the original object in the result with the new objects from the split
+  //   result.splice(index, 1, ...new_objects);
+  
+  //   return result;
+  // }
+  
+  // // title: 'Your title'
+  // // paragraphArray: [ 'This is a line', 'This is another line', 'Your title', 'This is NOT the title' ]
+  
+  // // takes an array of RevealedObjects and merges any with the same revealed score
+  // mergeByRevealedScores(revealed: RevealedObject[]): RevealedObject[] {
+  //   const copy: Array<RevealedObject | undefined> = revealed.slice();
+  //   // sort by the interval start, so overlapping intervals will be next to each other
+  //   // a! means that we know none of the array is undefined yet
+  //   copy.sort((a, b) => a!.index_interval_start - b!.index_interval_start);
+  
+  //   // merges before into current, and current into after, so that there are no gaps
+  //   // skips to i = 1 because it checks before: (i - 1)
+  //   for (let i = 1; i < copy.length; i++) {
+  //     const before = copy[i - 1];
+  //     const after = copy[i + 1];
+  //     const current = copy[i];
+  
+  //     // (0, 1) (1, 5)
+  //     // (0, 5)
+  //     if (current && before && before.revealed_score === current.revealed_score) {
+  //       current.index_interval_start = Math.min(
+  //         current.index_interval_start,
+  //         before.index_interval_start
+  //       );
+  //       current.index_interval_end = Math.max(
+  //         current.index_interval_end,
+  //         before.index_interval_end
+  //       );
+  
+  //       // merge before into current
+  //       copy[i - 1] = undefined;
+  //       copy[i] = current;
+  //     }
+  //     if (current && after && after.revealed_score === current.revealed_score) {
+  //       after.index_interval_start = Math.min(
+  //         after.index_interval_start,
+  //         current.index_interval_start
+  //       );
+  //       after.index_interval_end = Math.max(
+  //         after.index_interval_end,
+  //         current.index_interval_end
+  //       );
+  
+  //       // merge current into after
+  //       copy[i] = undefined;
+  //       copy[i + 1] = after;
+  //     }
+  //   }
+  
+  //   return copy.filter((x): x is RevealedObject => x != null);
+  // }
+  
+  // // chooses a random line index where that line contains a RevealedObject with a specific revealed_score, if there are no such lines returns -1
+  // chooseRandomLineIndexWithRevealedScore(
+  //   revealed: RevealedObject[][],
+  //   revealed_score: 0 | 1
+  // ): number {
+  //   const lineIndices = this.findRevealedObjectArrayLineIndices(
+  //     revealed,
+  //     revealed_score
+  //   );
+  //   const randomLineIndex = lineIndices[this.randomInteger(lineIndices.length)];
+  //   return randomLineIndex ?? -1;
+  // }
 }
 
 

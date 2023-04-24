@@ -63,8 +63,11 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
 <!--Interaction View------------------- -->
 <div *ngIf="view==0">
     <!-- creator & reveal score ----------------  -->
-    <div class="display--flex justify-content--flex-start">
+    <div *ngIf="!isButtonSaveClicked" class="display--flex justify-content--flex-start" style="margin-left: 10px;">
         <p style="color: rgb(130, 130, 130)">( you are viewing title + {{newRevealScoreToPublic}}% of the work)</p>
+    </div >
+    <div *ngIf="isButtonSaveClicked" class="display--flex justify-content--flex-start" style="margin-left: 10px;">
+        <p style="color: rgb(130, 130, 130)">( you are viewing title + 100% of the work)</p>
     </div>
     <div class="display--flex justify-content--flex-end">
         <p>@{{ originalCreator }}</p>
@@ -141,9 +144,9 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
             </div>
             <!-- "Save" button -->
             <!-- shown when "Save" not clicked & disabled when no input texts -->
-            <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once
-                hitting Save)</p>
-            <div class="justify-content--flex-end display--flex margin-top--24">
+            <!-- <p *ngIf="!isButtonSaveClicked" style="color: rgb(130, 130, 130)">(you can no longer edit the piece once
+                hitting Save)</p> -->
+            <div class="justify-content--flex-end display--flex margin-top--24" style="margin-right: 20px;">
                 <button *ngIf="!isButtonSaveClicked" (click)="getSortedItems(); hideResortableList()"
                     [disabled]="!hasNonEmptyInputs()">Save</button>
             </div>
@@ -166,7 +169,7 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
 
 
             <!-- for testing hidong and revealing -->
-            <button (click)="contributeToShow()">contribute to show</button>
+            <!-- <button (click)="contributeToShow()">contribute to show</button> -->
             <!-- <button (click)="PassTimeToHide()">pass time to hide</button> -->
         </div>
     </div>
@@ -175,8 +178,8 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
 <!--Community View------------------- -->
 <div *ngIf="view==1">
     <!-- creator & reveal score ----------------  -->
-    <div class="display--flex justify-content--flex-start">
-        <p style="color: rgb(130, 130, 130)">( you are viewing title + 100% of the work)</p>
+    <div class="display--flex justify-content--flex-start" style="margin-left: 10px;">
+        <p style="color: rgb(130, 130, 130);">( you are viewing title + 100% of the work)</p>
     </div>
     <div class="display--flex justify-content--flex-end">
         <p>@{{ originalCreator }}</p>
@@ -228,7 +231,7 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
 <!--Public View---------------------- -->
 <div *ngIf="view==2">
     <!-- creator & reveal score ----------------  -->
-    <div class="display--flex justify-content--flex-start">
+    <div class="display--flex justify-content--flex-start" style="margin-left: 10px;">
         <p style="color: rgb(130, 130, 130)">( you are viewing title + {{newRevealScoreToPublic}}% of the work)</p>
     </div>
     <div class="display--flex justify-content--flex-end">
@@ -266,7 +269,7 @@ width: 100px; cursor: pointer;" (click)="goToHome()" />
 <!--Owner View------------------>
 <div *ngIf="view==3">
     <!-- creator & reveal score ----------------  -->
-    <div class="display--flex justify-content--flex-start">
+    <div class="display--flex justify-content--flex-start" style="margin-left: 10px;">
         <p style="color: rgb(130, 130, 130)">( you are viewing title + 100% of the work)</p>
     </div>
     <div class="display--flex justify-content--flex-end">
