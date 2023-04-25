@@ -131,6 +131,7 @@ export class CreateInteractionWorkComponent implements OnInit {
   nextSentenceForParallel = '';
   startIndexofSelected = -1;
   endIndexofSelected = -1;
+  isPublished = false;
 
   entireParagraphWithBreak: any = undefined; // paragraph.paragraph in the database itself is already w/ break
   entireParagraphWithoutBreak: any = undefined; // remove <br> from paragraph.paragraph
@@ -226,6 +227,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.paragraphArrayInString = data.paragraph;
       
       // console.log("data.revealed is: " + data.revealed)
+      this.originalCreator = data.creator_username;
       this.allParallelSentencesSent = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.sentence);
       this.allParallelSentencesId = data.parallel_sentences.map((obj: {id:string, sentence:string})=> obj.id);
       this.currentId = this.route.snapshot.params['id'];
@@ -363,6 +365,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       ],
       "revealed": this.resortedInputValuesRevealed
     }
+    this.isPublished = true;
     this.postParagraph(paragraph);
     // this.contributeToShow(); ! uncommand this when done testing!
   }
