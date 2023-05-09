@@ -7,6 +7,17 @@ import { RouterModule } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import ObjectId from 'bson-objectid';
 
+interface RevealedObject {
+  /** inclusive */
+  index_interval_start: number;
+  /** not inclusive */
+  index_interval_end: number;
+  /** 0 is hide, 1 is show */
+  revealed_score: 0 | 1;
+  /** is this a title? */
+  is_title?: true;
+}
+
 @Component({
   selector: 'app-create-original-work',
   templateUrl: './create-original-work.component.html',
@@ -63,8 +74,6 @@ export class CreateOriginalWorkComponent {
   // ------ Flask "POST" : Post Original paragraph -------------------
   publishNewParagraph() {
     console.log("Publish new paragraph.");
-    // const objectId = new ObjectId();
-    // this.newParagraphObjectId = objectId;
     let paragraph = {
       "title": this.selectedTitle,
       "title_index": this.selectedLineIndex,
@@ -80,7 +89,7 @@ export class CreateOriginalWorkComponent {
           "sentence": this.selectedTitle,
         }
       ],
-      "revealed": this.inputValuesRevealed
+      "revealed": this.makeRevealedFromParagraph(this.inputTextinArray, this.selectedLineIndex)
     }
     this.postParagraph(paragraph);
     this.isPublished = true;
@@ -188,6 +197,33 @@ export class CreateOriginalWorkComponent {
 
   goToStarter(){
     this.router.navigate(['/starter']);
+  }
+
+  // turns a paragraph array into a nested array of RevealedObjects
+  makeRevealedFromParagraph(
+    paragraph: readonly string[],
+    titleIndex: number
+  ): RevealedObject[][] {
+    return paragraph.map<RevealedObject[]>((line, idx) => {
+      if (idx === titleIndex) {
+        return [
+          {
+            index_interval_start: 0,
+            index_interval_end: line.length,
+            revealed_score: 1,
+            is_title: true,
+          },
+        ];
+      }
+
+      return [
+        {
+          index_interval_start: 0,
+          index_interval_end: line.length,
+          revealed_score: 0,
+        },
+      ];
+    });
   }
 }
 
