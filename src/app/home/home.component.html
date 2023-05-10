@@ -52,7 +52,8 @@ width: 100px; cursor: pointer;"/>
                 <button *ngIf="isWho[i][2]" (click)="onClickInteraction(idArray[i])" class="btn btn-primary" style="border:none; margin: 4px;">Interaction view</button>
             </div>
             <button (click)="viewParagraph(idArray[i])" class="btn btn-primary" style="border:none;">Public View</button>
-        </div>
+        </div> 
       <p *ngIf="!isWho[i]" style="font-size: x-small;margin: 10px; ">Sign in for other views</p>
+      <p style="font-size: small;margin: 10px;">Revealed score: {{ revealScoreToPublicArray[i] }}</p>
     </div>
 </div>

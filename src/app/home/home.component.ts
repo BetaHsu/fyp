@@ -47,6 +47,7 @@ export class HomeComponent {
   idArray:string[] = [];
   titleArray:string[] = [];
   parallelSentencesArray:string[][] = [];
+  revealScoreToPublicArray:string[] = [];
   temp:string[] = [];
 
   // ------ Flask "GET" : get all paragraph-------------------
@@ -66,17 +67,18 @@ export class HomeComponent {
       this.titleArray = data.map((obj: { title: any }) => obj.title);
       this.parallelSentencesArray = data.map((obj: { parallel_sentences: any[] }) => 
         obj.parallel_sentences.map((idObj: { id: string }) => idObj.id)
-    );
+      );
       this.parallelSentencesArray = data.reduce((acc: any[], obj: { parallel_sentences: any[] }) => {
         const sentences = obj.parallel_sentences.map((sentObj: {id: string})=>sentObj.id);
         acc.push(sentences);
         return acc;
       }, []);
-      console.log("idArray is:" + this.idArray);
-      console.log("titleArray is:" + this.titleArray);
-      console.log("parallelSentencesArray[0] is:" + this.parallelSentencesArray[0]);
-      console.log("parallelSentencesArray[0][2] is:" + this.parallelSentencesArray[0][2]);
-      console.log("parallelSentencesArray is:" + this.parallelSentencesArray);
+      this.revealScoreToPublicArray = data.map((obj: { reveal_score_to_public: any }) => obj.reveal_score_to_public);
+      // console.log("idArray is:" + this.idArray);
+      // console.log("titleArray is:" + this.titleArray);
+      // console.log("parallelSentencesArray[0] is:" + this.parallelSentencesArray[0]);
+      // console.log("parallelSentencesArray[0][2] is:" + this.parallelSentencesArray[0][2]);
+      // console.log("parallelSentencesArray is:" + this.parallelSentencesArray);
     }));
   }
 

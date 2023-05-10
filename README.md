@@ -1,32 +1,21 @@
-# Fyp
+# Front-end code 
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.1.
+## Create Interaction Work
 
-## Development server
+Work page, including Interaction View, Community View. Public View, Owner View with user restrictions. For creating rewriting work & routing to other work pages.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Create Original Work
 
-## Code scaffolding
+For creating original work.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Home
 
-## Build
+Collection of all works in card view.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Onboarding Page
 
-## Running unit tests
+Sign In & Sign Up
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Starter
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-## Generate new page
-`ng generate component COMPONENT_NAME`
-
-Update the app-routing.module.ts routes with your new page.
+About Re-collect

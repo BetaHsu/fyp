@@ -37,7 +37,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.isLoggedIn = false;
     }
     const currentParagraphId = this.route.snapshot.params['id'];
-    console.log("currentParagraphId is: " + currentParagraphId);
+    // console.log("currentParagraphId is: " + currentParagraphId);
     this.route.queryParams.subscribe(params => {
       if (params['fromCreateOriginalWork'] === 'true') {
         this.view = 3;
@@ -219,8 +219,14 @@ export class CreateInteractionWorkComponent implements OnInit {
         // if(this.lastUpdateTime){
         // let newRevealedObject;
         const currentTime = new Date();
-        const hoursSinceLastUpdate = (currentTime.getTime() - this.lastUpdateTime.getTime()) / (1000 * 60 * 60 * 12);
-        console.log(`7 Hours since last update: ${hoursSinceLastUpdate}`);
+        const hoursSinceLastUpdate = Math.floor((currentTime.getTime() - this.lastUpdateTime.getTime()) / (1000 * 60 * 60));
+        console.log("hoursSinceLastUpdate is: " + hoursSinceLastUpdate);
+        const numberOfHours = 12;
+        const callTime = Math.floor(hoursSinceLastUpdate / numberOfHours);
+        console.log("callTime is: " + callTime);
+        // if (data.reveal_score_to_public > 0) {
+        //   this.passTimeToHide(callTime);
+        // }
         // for (let i = 0; i<hoursSinceLastUpdate; i++ ){
         //   newRevealedObject = this.PassTimeToHide(this.revealedObject);
         //   this.revealedObject = newRevealedObject;
@@ -239,19 +245,17 @@ export class CreateInteractionWorkComponent implements OnInit {
         this.allParallelSentencesSent = data.parallel_sentences.map((obj: { id: string, sentence: string }) => obj.sentence);
         this.allParallelSentencesId = data.parallel_sentences.map((obj: { id: string, sentence: string }) => obj.id);
         this.currentId = this.route.snapshot.params['id'];
-        console.log("allParallelSentences sentence length are:" + this.allParallelSentencesSent.length);
         this.allParallel = data.parallel_sentences; // entire parallel_sentences Object, no use for now
         this.currentTitle = this.items[1].inputs[0].value = data.title;
-        console.log("currentTitle is update to: " + this.currentTitle);
         this.renderParallel(this.allParallelSentencesSent);
         this.newRevealScoreToPublic = data.reveal_score_to_public;
-        this.calRevealScoreToPublic(this.revealedObject);
+        // this.calRevealScoreToPublic(this.revealedObject);
       }));
   }
 
 
   // ------ Flask "POST" : poat revealed object to replace-------------------
-  postRevealedObjectToReplace(originalParagraphId: any, newRevealedObject: any, isShownotHide: boolean){
+  postRevealedObjectToReplace(originalParagraphId: any, newRevealedObject: any, isShownotHide: boolean) {
     console.log('Posting entire new Revealed Object to replace.')
     const data = {
       originalParagraphId: originalParagraphId,
@@ -278,14 +282,14 @@ export class CreateInteractionWorkComponent implements OnInit {
     console.log("Generating paragraph")
     for (let i = 0; i < this.paragraphArray.length; i++) {
       let line = this.paragraphArray[i];
-      console.log("line is: " + line);
+      // console.log("line is: " + line);
       let sections = revealedObject[i];
       let sectionStrings: string[] = [];
       for (let j = 0; j < sections.length; j++) {
         let section = sections[j];
-        console.log("line[" + i + "] section[" + j + "](start, end) is: " + section.index_interval_start, section.index_interval_end);
+        // console.log("line[" + i + "] section[" + j + "](start, end) is: " + section.index_interval_start, section.index_interval_end);
         let sectionText = line.substring(section.index_interval_start, section.index_interval_end);
-        console.log("sectionText is: " + sectionText);
+        // console.log("sectionText is: " + sectionText);
         let sectionClass;
         if (section.revealed_score == 1) {
           sectionClass = 'substring--visible';
@@ -293,10 +297,10 @@ export class CreateInteractionWorkComponent implements OnInit {
           sectionClass = 'substring--hidden';
         }
         let sectionString = `<span class="${sectionClass}">${sectionText}</span>`;
-        console.log(" lnie " + i + " section " + j + "sectionString is: " + sectionString);
+        // console.log(" lnie " + i + " section " + j + "sectionString is: " + sectionString);
         sectionStrings.push(sectionString);
       }
-      console.log(" sectionString is: " + sectionStrings);
+      // console.log(" sectionString is: " + sectionStrings);
       this.output += sectionStrings.join('') + '<br>';
     }
     console.log("output is: " + this.output);
@@ -348,7 +352,7 @@ export class CreateInteractionWorkComponent implements OnInit {
     }
     this.isPublished = true;
     this.postParagraph(paragraph);
-    this.contributeToShow(); 
+    this.contributeToShow();
   }
   postParagraph(paragraph: any) {
     console.log('Posting paragraph.')
@@ -482,45 +486,47 @@ export class CreateInteractionWorkComponent implements OnInit {
     console.log("contributeToShow working.");
     const chosenLineIndex = this.chooseRandomLineIndexWithRevealedScore(this.revealedObject, 0);
     const chosenLine = this.revealedObject[chosenLineIndex];
-    console.log("chosen line is: " + chosenLine);
-    console.log("chosen lineIndex is: " + chosenLineIndex);
+    // console.log("chosen line is: " + chosenLine);
+    // console.log("chosen lineIndex is: " + chosenLineIndex);
     const randomHiddenObjectIndex = this.randomInteger(this.findRevealedObjectIndices(chosenLine, 0).length);
-    console.log("randomHiddenObjectIndex is: " + randomHiddenObjectIndex);
+    // console.log("randomHiddenObjectIndex is: " + randomHiddenObjectIndex);
 
     const splittedUpdate = this.splitRevealedAtIndex(chosenLine, randomHiddenObjectIndex);
-    console.log("splittedUpdate.length is: " + splittedUpdate.length);
+    // console.log("splittedUpdate.length is: " + splittedUpdate.length);
     const mergedUpdate = this.mergeByRevealedScores(splittedUpdate);
-    console.log("mergedUpdate.length is: " + mergedUpdate.length);
+    // console.log("mergedUpdate.length is: " + mergedUpdate.length);
 
     this.revealedObject[chosenLineIndex] = mergedUpdate;
-    console.log("chosen line (updated) length is: ", this.revealedObject[chosenLineIndex].length);
-    console.log("chosen line (updated) is: ", this.revealedObject[chosenLineIndex]);
+    // console.log("chosen line (updated) length is: ", this.revealedObject[chosenLineIndex].length);
+    // console.log("chosen line (updated) is: ", this.revealedObject[chosenLineIndex]);
 
     const isShowNotHide = true;
     this.postRevealedObjectToReplace(this.originalParagraphId, this.revealedObject, isShowNotHide);
+    this.calRevealScoreToPublic(this.revealedObject);
   }
 
   // ------------- To hide -----------------
-  passTimeToHide() { // 1 => (1, 0, 1)
-    console.log("passTimeToHide working.");
-    const chosenLineIndex = this.chooseRandomLineIndexWithRevealedScore(this.revealedObject, 1);
-    const chosenLine = this.revealedObject[chosenLineIndex];
-    console.log("chosen line is: " + chosenLine);
-    console.log("chosen lineIndex is: " + chosenLineIndex);
-    const randomHiddenObjectIndex = this.randomInteger(this.findRevealedObjectIndices(chosenLine, 1).length);
-    console.log("randomHiddenObjectIndex is: " + randomHiddenObjectIndex);
+  passTimeToHide(callTime: number) { // 1 => (1, 0, 1)
+    for (let i = 0; i < callTime; i++) {
+      console.log("passTimeToHide working.");
+      const chosenLineIndex = this.chooseRandomLineIndexWithRevealedScore(this.revealedObject, 1);
+      const chosenLine = this.revealedObject[chosenLineIndex];
+      console.log("chosen lineIndex is: " + chosenLineIndex);
+      const randomHiddenObjectIndex = this.randomInteger(this.findRevealedObjectIndices(chosenLine, 1).length);
+      console.log("randomHiddenObjectIndex is: " + randomHiddenObjectIndex);
 
-    const splittedUpdate = this.splitRevealedAtIndex(chosenLine, randomHiddenObjectIndex);
-    console.log("splittedUpdate.length is: " + splittedUpdate.length);
-    const mergedUpdate = this.mergeByRevealedScores(splittedUpdate);
-    console.log("mergedUpdate.length is: " + mergedUpdate.length);
+      const splittedUpdate = this.splitRevealedAtIndex(chosenLine, randomHiddenObjectIndex);
+      console.log("splittedUpdate.length is: " + splittedUpdate.length);
+      const mergedUpdate = this.mergeByRevealedScores(splittedUpdate);
+      console.log("mergedUpdate.length is: " + mergedUpdate.length);
 
-    this.revealedObject[chosenLineIndex] = mergedUpdate;
-    console.log("chosen line (updated) length is: ", this.revealedObject[chosenLineIndex].length);
-    console.log("chosen line (updated) is: ", this.revealedObject[chosenLineIndex]);
-
+      this.revealedObject[chosenLineIndex] = mergedUpdate;
+      // console.log("chosen line (updated) length is: ", this.revealedObject[chosenLineIndex].length);
+      console.log("chosen line (updated) is: ", this.revealedObject[chosenLineIndex]);
+    }
     const isShowNotHide = false;
     this.postRevealedObjectToReplace(this.originalParagraphId, this.revealedObject, isShowNotHide);
+    this.calRevealScoreToPublic(this.revealedObject);
   }
 
   // -------- For resortable input fields --------------------------------
@@ -611,7 +617,7 @@ export class CreateInteractionWorkComponent implements OnInit {
       this.lastParallelId = this.allParallelSentencesId[allParallelSentencesSent.length - 1];
       this.otherParallelTextId = this.allParallelSentencesId.slice(1, -1);
       this.otherParallelText = allParallelSentencesSent.slice(1, -1); // without 1st and last
-      console.log("otherParallelText is:" + this.otherParallelText);
+      // console.log("otherParallelText is:" + this.otherParallelText);
       this.otherParallelTextWithBreak = this.otherParallelText.join("<br>");
       this.otherParallelTextWithSpanBreak = "<span class=substring--hidden>" + this.otherParallelTextWithBreak + "</span>";
       // console.log("otherParallelTextWithBreak is:" + this.otherParallelTextWithBreak);
